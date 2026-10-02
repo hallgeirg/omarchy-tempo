@@ -1,0 +1,11 @@
+# Private runtime data never belongs here
+credentials.json
+timers.json
+snapshot.json
+.env
+.env.*
+*.csv
+*.log
+*.test
+coverage.out
+.DS_Store

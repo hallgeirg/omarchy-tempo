@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="817" viewBox="0 0 1120 817">
+<rect width="100%" height="100%" rx="14" fill="#180f29"/>
+<g fill="#cfadfa" font-family="DejaVu Sans Mono,monospace" font-size="14" xml:space="preserve">
+<text x="24" y="35">◷  T E M P O  /  TOGGL COMMAND CENTER    DEMO · NO ACCOUNT CHANGES    Fri 02 Oct 22:36                                </text>
+<text x="24" y="54">╭─ 1 CURRENT SESSION ────────────────────────────────────────────────╮ ╭─ 2 THIS WEEK ───────────────────────────────╮</text>
+<text x="24" y="73">│ ▶ Building something worth the time                                │ │ THIS WEEK  19.5h                            │</text>
+<text x="24" y="92">│                                                                    │ │                                             │</text>
+<text x="24" y="111">│ █▀█ █▀█     █ █ ▀▀█      ▀█ █▀█                                    │ │ Sat ━━━━━━━━━━━━━━━    3.8h                 │</text>
+<text x="24" y="130">│ █ █ █ █  ▪  ▀▀█ █▀▀  ▪    █ █▀█                                    │ │ Sun ━━━━━━━━━━━━━━━    3.8h                 │</text>
+<text x="24" y="149">│ ▀▀▀ ▀▀▀  ▪    ▀ ▀▀▀  ▪    ▀ ▀▀▀                                    │ │ Mon ━━━━━━━━━━━━━━━    3.8h                 │</text>
+<text x="24" y="168">│                                                                    │ │ Tue ━━━━━━━━━━━━━━━    3.8h                 │</text>
+<text x="24" y="187">│ Make More · Strategy / focus / BILLABLE                            │ │ Wed ━━━━━━━━━━━━━━━    3.8h                 │</text>
+<text x="24" y="206">│                                                                    │ │ Thu ━━━━━━━━━━━━━━━    3.8h                 │</text>
+<text x="24" y="225">│ [ N new ]    [ S stop ]    [ F save ]                              │ │ Fri ━━━━━━━━━━━━━━━━━━ 4.5h                 │</text>
+<text x="24" y="244">│                                                                    │ │                                             │</text>
+<text x="24" y="263">│                                                                    │ │                                             │</text>
+<text x="24" y="282">╰────────────────────────────────────────────────────────────────────╯ ╰─────────────────────────────────────────────╯</text>
+<text x="24" y="301">╭─ 3 SAVED TIMERS ────────────────────────────╮ ╭─ 4 RECENT ENTRIES ─────────────────────────────────────────────────╮</text>
+<text x="24" y="320">│ TIMER                       PROJECT         │ │ STARTED   DESCRIPTION                     TIME                     │</text>
+<text x="24" y="339">│ ▸ Strategy workshop       Make More · Stra… │ │   Fri 21:54 Building something worth the time            ▶00:42:18 │</text>
+<text x="24" y="358">│   Growth planning         Client · Growth $ │ │   Fri 08:00 Strategy workshop                            01:30:00  │</text>
+<text x="24" y="377">│   Project follow-up       Operations        │ │   Fri 10:00 Growth planning                              01:15:00  │</text>
+<text x="24" y="396">│                                             │ │   Fri 12:00 Project follow-up                            01:00:00  │</text>
+<text x="24" y="415">│                                             │ │   Thu 08:00 Strategy workshop                            01:30:00  │</text>
+<text x="24" y="434">│                                             │ │   Thu 10:00 Growth planning                              01:15:00  │</text>
+<text x="24" y="453">│                                             │ │   Thu 12:00 Project follow-up                            01:00:00  │</text>
+<text x="24" y="472">│                                             │ │   Wed 08:00 Strategy workshop                            01:30:00  │</text>
+<text x="24" y="491">│                                             │ │   Wed 10:00 Growth planning                              01:15:00  │</text>
+<text x="24" y="510">│                                             │ │   Wed 12:00 Project follow-up                            01:00:00  │</text>
+<text x="24" y="529">│                                             │ │   Tue 08:00 Strategy workshop                            01:30:00  │</text>
+<text x="24" y="548">│                                             │ │   Tue 10:00 Growth planning                              01:15:00  │</text>
+<text x="24" y="567">│                                             │ │   Tue 12:00 Project follow-up                            01:00:00  │</text>
+<text x="24" y="586">│                                             │ │   Mon 08:00 Strategy workshop                            01:30:00  │</text>
+<text x="24" y="605">│                                             │ │   Mon 10:00 Growth planning                              01:15:00  │</text>
+<text x="24" y="624">╰─────────────────────────────────────────────╯ ╰────────────────────────────────────────────────────────────────────╯</text>
+<text x="24" y="643">╭─ 5 TODAY BY PROJECT ───────────────────────────────────────────────────────────────────────────────────────────────╮</text>
+<text x="24" y="662">│ TODAY  4.5h  ━━━━━━━━━━━━━━━ / 8h reference                                                                        │</text>
+<text x="24" y="681">│ Make More · Strategy             2.2h  ━━━━━━━━━━━━━━━━                                                            │</text>
+<text x="24" y="700">│ Client · Growth                  1.2h  ━━━━━━━━━                                                                   │</text>
+<text x="24" y="719">│ Operations                       1.0h  ━━━━━━━                                                                     │</text>
+<text x="24" y="738">╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</text>
+<text x="24" y="757">Hallgeir · synced 22:36:38 · local clock / 10-minute sync</text>
+<text x="24" y="776"> N new  S stop  F save  E edit saved  Enter start  Tab switch  ↑↓ select  R sync  A account  X export  Q quit</text>
+</g></svg>

@@ -1,0 +1,4 @@
+#!/bin/bash
+set -eu
+root=$(dirname "$(dirname "$(readlink -f "$0")")")
+exec "$root/bin/tempo-native" "$@"

@@ -1,0 +1,4 @@
+#!/bin/bash
+set -eu
+root=$(dirname "$(readlink -f "$0")")
+exec omarchy-launch-or-focus-tui --app-id=org.omarchy.tempo "$root/tempo" "$@"

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "hallgeirg.timery",
+  "name": "Tempo \u00b7 Toggl",
+  "version": "0.1.0",
+  "author": "Hallgeir",
+  "license": "MIT",
+  "description": "Timery-inspired Toggl timers in a btop-style terminal dashboard.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Widget.qml"
+  },
+  "barWidget": {
+    "displayName": "Tempo",
+    "description": "Live Toggl timer and keyboard-first time dashboard",
+    "category": "Productivity",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  },
+  "homepage": "https://github.com/hallgeirg/omarchy-tempo"
+}
