@@ -1,6 +1,6 @@
 # Tempo — Toggl for Omarchy
 
-![HG Tempo · Time, well spent](assets/tempo-mark.svg)
+![HG Tempo · Every second counts..](assets/tempo-mark.svg)
 
 [![Go checks](https://github.com/hallgeirg/omarchy-tempo/actions/workflows/ci.yml/badge.svg)](https://github.com/hallgeirg/omarchy-tempo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-8BD5CA)](LICENSE)

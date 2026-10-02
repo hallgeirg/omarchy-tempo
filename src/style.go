@@ -103,7 +103,7 @@ func keycap(key, label string) string { return color("["+key+"]", cyan) + color(
 func wordmark(width int) string {
 	mark := "TEMPO / TOGGL TRACK"
 	if prefs.Brand {
-		mark = "HG / TEMPO     TIME, WELL SPENT."
+		mark = "HG / TEMPO     Every second counts.."
 	}
 	if width < 90 {
 		mark = "TEMPO / TOGGL"
