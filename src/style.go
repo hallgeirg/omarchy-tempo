@@ -118,7 +118,10 @@ func meter(n, total int64, width int) string {
 	return color(strings.Repeat(icon("━", "="), filled), green) + color(strings.Repeat(icon("┄", "-"), max(0, width-filled)), muted)
 }
 func shortcutLine(width int) string {
-	actions := [][2]string{{"N", "new"}, {"S", "stop"}, {"Enter", "start"}, {"Tab", "switch"}, {"?", "help"}, {"Q", "quit"}}
+	actions := [][2]string{{"N", "new"}, {"P", "projects"}, {"S", "stop"}, {"Enter", "start"}, {"Tab", "switch"}, {"?", "help"}, {"Q", "quit"}}
+	if width < 85 {
+		actions = [][2]string{{"N", "new"}, {"P", "projects"}, {"Enter", "start"}, {"?", "help"}, {"Q", "quit"}}
+	}
 	var parts []string
 	for _, a := range actions {
 		parts = append(parts, keycap(a[0], a[1]))
@@ -127,11 +130,11 @@ func shortcutLine(width int) string {
 }
 func (m model) helpView() string {
 	body := color("MAKE EVERY KEYSTROKE COUNT", cyan) + "\n\n"
-	for _, row := range [][2]string{{"N", "Create a timer · workspace, project, tags, billing"}, {"S", "Stop the current Toggl timer"}, {"Enter", "Start selected saved timer / repeat recent entry"}, {"F / E", "Save a timer / edit selected saved timer"}, {"Delete", "Remove a local saved timer"}, {"Tab / arrows", "Switch lists; Up/Down or J/K selects a row"}, {"R / A", "Sync Toggl / connect account"}, {"X", "Export cached entries as CSV"}, {"Q", "Quit · your timer keeps running"}} {
+	for _, row := range [][2]string{{"P / /", "Browse all projects · type to search"}, {"Ctrl+P", "Search projects while editing a timer"}, {"N", "Create a timer · workspace, project, tags, billing"}, {"S", "Stop the current Toggl timer"}, {"Enter", "Start selected saved timer / repeat recent entry"}, {"F / E", "Save a timer / edit selected saved timer"}, {"Delete", "Remove a local saved timer"}, {"Tab / arrows", "Switch lists; Up/Down or J/K selects a row"}, {"R / A", "Sync Toggl / connect account"}, {"X", "Export cached entries as CSV"}, {"Q", "Quit · your timer keeps running"}} {
 		body += fmt.Sprintf("%-15s %s\n", row[0], row[1])
 	}
 	body += "\n" + color("Preferences: ~/.config/omarchy-tempo/preferences.json", muted) + "\n" + color("? or Esc closes help", cyan)
-	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, panel("? FIELD GUIDE", body, min(76, m.width-2), 17, violet))
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, panel("? FIELD GUIDE", body, min(76, m.width-2), 19, violet))
 }
 
 func (m *model) styleInputs() {

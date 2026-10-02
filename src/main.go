@@ -88,6 +88,11 @@ type resultMsg struct {
 	token  string
 }
 type model struct {
+	search                       textinput.Model
+	projectCursor                int
+	activeOnly                   bool
+	projectReturn                string
+	projectDraft                 Entry
 	store                        Store
 	client                       *Client
 	data                         Snapshot
@@ -269,6 +274,26 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key == "ctrl+c" {
 			return m, tea.Quit
 		}
+		if m.mode == "projects" {
+			cmd := m.projectsUpdate(v)
+			return m, cmd
+		}
+		if m.mode != "" && m.mode != "account" && m.mode != "help" && key == "ctrl+p" {
+			en := m.form
+			en.Description = m.inputs[0].Value()
+			en.Tags = nil
+			for _, tag := range strings.Split(m.inputs[1].Value(), ",") {
+				if tag = strings.TrimSpace(tag); tag != "" {
+					en.Tags = append(en.Tags, tag)
+				}
+			}
+			if m.projectIndex > 0 {
+				pid := m.projects[m.projectIndex-1].ID
+				en.Project = &pid
+			}
+			m.openProjects(m.mode, en)
+			return m, textinput.Blink
+		}
 		if m.mode == "help" {
 			if key == "esc" || key == "?" {
 				m.mode = ""
@@ -280,6 +305,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 		switch key {
+		case "p", "/":
+			m.openProjects("", Entry{})
+			return m, textinput.Blink
 		case "?":
 			m.mode = "help"
 		case "q":
@@ -536,13 +564,16 @@ func (m model) formView() string {
 		}
 		body.WriteString("\n\n")
 	}
-	body.WriteString(color("Tab next · ← → choices · Enter confirm · Esc cancel", muted) + "\n\n")
+	body.WriteString(color("Tab next · ← → choices · Ctrl+P projects · Enter confirm", muted) + "\n\n")
 	body.WriteString("Starting switches from the current Toggl timer.")
 	return lipgloss.Place(m.width, max(25, m.height-2), lipgloss.Center, lipgloss.Center, panel("TIMER", body.String(), min(76, m.width-2), 21, violet))
 }
 func (m model) View() string {
 	if m.width < 72 || m.height < 26 {
 		return "Tempo needs a terminal at least 72 columns × 26 rows.\nResize this window. Q quits."
+	}
+	if m.mode == "projects" {
+		return m.projectsView()
 	}
 	if m.mode == "help" {
 		return m.helpView()
@@ -789,10 +820,14 @@ func main() {
 		fmt.Println(string(b))
 		return
 	}
+	projects := flag.Bool("projects", false, "Open the searchable project explorer")
 	demo := flag.Bool("demo", false, "Preview sample data without changing Toggl")
 	snapshot := flag.Bool("render", false, "Render demo dashboard once for inspection")
 	flag.Parse()
 	m := initial(*demo || *snapshot)
+	if *projects {
+		m.openProjects("", Entry{})
+	}
 	if *snapshot {
 		lipgloss.SetColorProfile(termenv.TrueColor)
 		fmt.Println(m.View())

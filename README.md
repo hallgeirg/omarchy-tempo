@@ -27,6 +27,7 @@ Artwork uses fictional data and example palettes. The app follows your active th
 - Theme-aware frames and accents, transparent panel interiors, an HG signature you can turn off, and configurable density/panels.
 - Live timer in the Omarchy bar; click it to open or focus the dashboard.
 - Start/stop timers, repeat recent entries, and create/edit reusable saved timers.
+- Searchable project explorer across workspaces, with client/workspace matching and an active/all filter.
 - Workspace, project, tags, and billable controls when creating a timer.
 - Daily project totals, seven-day activity, and calendar-week totals.
 - CSV export of cached entries.
@@ -64,6 +65,8 @@ Enter your token inside Tempo, never in a GitHub issue or shell command. Startin
 | Key | Action |
 | --- | --- |
 | **N** | New timer |
+| **P / /** | Browse projects across workspaces; type to search |
+| **Ctrl+P** | Search and select a project inside a timer form |
 | **S** | Stop current Toggl timer |
 | **Enter** | Start selected saved timer or repeat recent entry |
 | **F** | Save selected/current entry as a reusable timer |

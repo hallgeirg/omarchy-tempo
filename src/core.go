@@ -34,12 +34,15 @@ type Entry struct {
 	Deleted     *time.Time `json:"server_deleted_at,omitempty"`
 }
 type Named struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	Workspace int64  `json:"workspace_id"`
-	Wid       int64  `json:"wid"`
-	Color     string `json:"color"`
-	Active    *bool  `json:"active,omitempty"`
+	ClientName string `json:"client_name,omitempty"`
+	CanTrack   *bool  `json:"can_track_time,omitempty"`
+	Billable   *bool  `json:"billable,omitempty"`
+	ID         int64  `json:"id"`
+	Name       string `json:"name"`
+	Workspace  int64  `json:"workspace_id"`
+	Wid        int64  `json:"wid"`
+	Color      string `json:"color"`
+	Active     *bool  `json:"active,omitempty"`
 }
 type Snapshot struct {
 	Name       string    `json:"name"`

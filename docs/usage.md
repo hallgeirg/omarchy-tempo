@@ -13,6 +13,8 @@ Timery's Apple/iCloud saved timers; your actual time entries live in Toggl.
 | Key | Action |
 |---|---|
 | N | New timer: description, workspace, project, tags, billable |
+| P / / | Browse/search projects across workspaces |
+| Ctrl+P | Search projects inside a timer form |
 | S | Stop the timer currently running in Toggl |
 | Enter | Start selected saved timer or repeat selected recent entry |
 | F | Save selected/running entry as a timer; editable before saving |
@@ -53,3 +55,7 @@ Tests: `cd src && go test -buildvcs=false ./...`
 Independent of Timery and Toggl. API: https://engineering.toggl.com/docs/track/api/
 
 For themes, transparency, layout preferences, and HG branding, see [Customization](customization.md).
+
+## Project explorer
+
+Press P or / from the dashboard. Type to search project names, clients, and workspaces; multiple words must all match. Up/Down selects, Page Up/Down moves ten rows, Tab toggles active/all, Enter opens a timer form, and Esc returns. Archived/read-only projects are visible but cannot start timers. The list uses your shared cached Toggl project data; refresh from the dashboard to load changes. Inside a timer form, Ctrl+P opens this browser while preserving the description, tags, and billing selection. Selecting a project opens the form; it never starts a timer without confirmation.
