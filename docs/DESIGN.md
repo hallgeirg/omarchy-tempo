@@ -6,11 +6,15 @@ This repository is a preview. Do not submit it to the Omarchy plugin catalog unt
 
 HG identity should come from typography, spacing, hierarchy, and small recognizable details. Default colors should follow the active Omarchy theme. Branding must not override the user's palette.
 
-## Proposed work, not implemented yet
+## Implemented for review
 
-- Define theme tokens for background, foreground, muted text, borders, focus, active timer, warnings, and chart accents.
-- Read Omarchy's active theme and handle theme changes without a dashboard restart; provide a standalone fallback.
-- Allow explicit user color overrides with documented precedence and accessible contrast.
+- Live Omarchy color roles with terminal fallback and explicit user overrides.
+- Transparent panel interiors and selection, optional opaque mode.
+- Subtle HG signature, clearer panel symbols, block timer, compact shortcut hints and keyboard field guide.
+- Configurable weekly/today panels, density, icon markers, and daily reference.
+
+## Remaining review work
+
 - User configuration for panel visibility, layout/density, date and time formats, week start, progress reference, and shortcuts.
 - First-run account onboarding, clearer timer selection/start confirmation, and useful empty/error/offline states.
 - Review the dashboard with real keyboard workflows, narrow terminals, and several light/dark Omarchy themes.

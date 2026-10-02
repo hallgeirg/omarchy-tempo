@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="220" viewBox="0 0 960 220" role="img" aria-label="HG Tempo — Time, well spent">
+<rect width="960" height="220" rx="20" fill="#181425"/>
+<g stroke="#8BD5CA" stroke-width="6" fill="none" stroke-linejoin="round">
+<path d="M48 52H160L104 108L160 164H48L104 108Z"/>
+<path d="M48 52L104 108L48 164" stroke="#C6A0F6"/>
+</g>
+<text x="204" y="76" font-family="monospace" font-size="17" letter-spacing="6" fill="#8BD5CA">HG / TOGGL TRACK</text>
+<text x="198" y="140" font-family="monospace" font-size="64" font-weight="bold" letter-spacing="10" fill="#E0DAF0">TEMPO</text>
+<text x="204" y="178" font-family="monospace" font-size="15" letter-spacing="4" fill="#9A93AC">TIME, WELL SPENT.</text>
+<path d="M662 78H908M662 110H842M662 142H876" stroke="#C6A0F6" stroke-width="3"/>
+<circle cx="908" cy="78" r="5" fill="#8BD5CA"/>
+</svg>

@@ -31,3 +31,7 @@ Tests use a local HTTP test server and temporary data directories; no live token
 Keep credentials out of logs, snapshots, command arguments, and fixtures. Use mocked HTTP tests for account-changing behavior. Avoid automatic write retries: a network error can occur after Toggl has accepted an operation. Preserve local cache sharing and rate-limit awareness. Demo mode must not alter a real account.
 
 Describe the problem, resulting behavior, and relevant verification in a pull request. Avoid including private screenshots or account data. For releases, rebuild the bundled Linux x86-64 binary from the committed source and update the manifest version and changelog.
+
+## Documentation artwork
+
+After building, run `python3 scripts/render-preview.py` to regenerate dark/light SVG previews from the real demo renderer. Python is only used for this development tool; the installed app remains native Go. The previews use isolated temporary homes and fictional demo data.

@@ -14,15 +14,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
+	"github.com/muesli/termenv"
 )
 
 var (
-	cyan   = lipgloss.Color("#68d9f3")
-	violet = lipgloss.Color("#b69cff")
-	green  = lipgloss.Color("#b8e994")
-	muted  = lipgloss.Color("#8b93b2")
-	text   = lipgloss.Color("#c7cce4")
-	red    = lipgloss.Color("#f38ba8")
+	cyan   = lipgloss.Color("6")
+	violet = lipgloss.Color("5")
+	green  = lipgloss.Color("2")
+	muted  = lipgloss.Color("8")
+	text   = lipgloss.Color("7")
+	red    = lipgloss.Color("1")
 )
 
 func color(s string, c lipgloss.Color) string { return lipgloss.NewStyle().Foreground(c).Render(s) }
@@ -93,6 +94,7 @@ type model struct {
 	favorites                    []Entry
 	width, height                int
 	demo, busy                   bool
+	failed                       bool
 	notice                       string
 	lastAttempt                  time.Time
 	focus, cursor                int
@@ -105,6 +107,7 @@ type model struct {
 }
 
 func initial(demo bool) model {
+	refreshStyle()
 	s := defaultStore()
 	m := model{store: s, client: newClient(s), data: s.cached(), favorites: s.saved(), width: 120, height: 42, demo: demo}
 	if demo {
@@ -174,6 +177,7 @@ func (m *model) openForm(mode string, en Entry) {
 	m.inputs[1].SetValue(strings.Join(en.Tags, ", "))
 	m.inputs[1].Placeholder = "Tags, separated by commas"
 	m.inputs[0].Focus()
+	m.styleInputs()
 	m.updateProjects()
 	if en.Project != nil {
 		for i, p := range m.projects {
@@ -211,6 +215,7 @@ func (m *model) connect() {
 	m.inputs[2].CharLimit = 200
 	m.inputs[2].Width = 50
 	m.inputs[2].Focus()
+	m.styleInputs()
 }
 func (m *model) start(en Entry) tea.Cmd {
 	if m.demo {
@@ -233,6 +238,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = v.Width
 		m.height = v.Height
 	case tickMsg:
+		refreshStyle()
+		m.styleInputs()
 		cmd := tick()
 		if !m.busy && !m.demo && m.client.Token != "" && time.Since(m.lastAttempt) >= syncEvery {
 			cmd = tea.Batch(cmd, m.refresh(false))
@@ -240,6 +247,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case resultMsg:
 		m.busy = false
+		m.failed = v.err != nil
 		if v.err != nil {
 			m.notice = v.err.Error()
 			if !v.data.Synced.IsZero() {
@@ -261,11 +269,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key == "ctrl+c" {
 			return m, tea.Quit
 		}
+		if m.mode == "help" {
+			if key == "esc" || key == "?" {
+				m.mode = ""
+			}
+			return m, nil
+		}
 		if m.mode != "" {
 			cmd := m.formUpdate(v)
 			return m, cmd
 		}
 		switch key {
+		case "?":
+			m.mode = "help"
 		case "q":
 			return m, tea.Quit
 		case "a":
@@ -528,6 +544,9 @@ func (m model) View() string {
 	if m.width < 72 || m.height < 26 {
 		return "Tempo needs a terminal at least 72 columns × 26 rows.\nResize this window. Q quits."
 	}
+	if m.mode == "help" {
+		return m.helpView()
+	}
 	if m.mode != "" {
 		return m.formView()
 	}
@@ -542,20 +561,23 @@ func (m model) View() string {
 	if m.demo {
 		status = "DEMO · NO ACCOUNT CHANGES"
 	}
-	header := lipgloss.NewStyle().Background(lipgloss.Color("#22253a")).Foreground(violet).Bold(true).Width(w).Render("◷  T E M P O  /  TOGGL COMMAND CENTER    " + status + "    " + now.Format("Mon 02 Jan 15:04"))
+	identity := wordmark(w)
+	meta := color(status+"  /  "+now.Format("Mon 15:04"), muted)
+	gap := max(1, w-lipgloss.Width(identity)-lipgloss.Width(meta))
+	header := ansi.Truncate(identity+strings.Repeat(" ", gap)+meta, w, "")
 	en := m.data.Current
-	title := "○ READY WHEN YOU ARE"
+	title := icon("○", "o") + " READY WHEN YOU ARE"
 	secs := int64(0)
 	detail := "N starts a timer · Enter repeats selected entry"
 	if en != nil {
-		title = "▶ " + en.Description
+		title = icon("▶", ">") + " " + en.Description
 		secs = elapsed(*en, now)
 		detail = projectName(m.data, *en) + " / " + strings.Join(en.Tags, ", ")
 		if en.Billable {
 			detail += " / BILLABLE"
 		}
 	}
-	current := color(fit(title, left-5), green) + "\n\n" + bigClock(clock(secs)) + "\n\n" + color(fit(detail, left-5), muted) + "\n\n" + color("[ N new ]    [ S stop ]    [ F save ]", violet)
+	current := color(fit(title, left-5), green) + "\n\n" + bigClock(clock(secs)) + "\n\n" + color(fit(detail, left-5), muted) + "\n\n" + keycap("N", "new") + "    " + keycap("S", "stop") + "    " + keycap("F", "save")
 	days, week := daily(m.data, now)
 	var chart strings.Builder
 	chart.WriteString(color("THIS WEEK  "+hour(week), cyan) + "\n\n")
@@ -571,8 +593,20 @@ func (m model) View() string {
 		}
 		chart.WriteString(color(date.Format("Mon")+" ", muted) + color(fmt.Sprintf("%-18s", bar(n, maximum, min(18, right-15))), c) + " " + hour(n) + "\n")
 	}
-	top := lipgloss.JoinHorizontal(lipgloss.Top, panel("1 CURRENT SESSION", current, left, 11, violet), " ", panel("2 THIS WEEK", chart.String(), right, 11, cyan))
-	lowerHeight := max(5, m.height-26)
+	var top string
+	topHeight := 11
+	if prefs.Compact || m.height < 32 {
+		topHeight = 9
+	}
+	if !prefs.ShowWeek {
+		top = panel(icon("◉", "*")+" LIVE SESSION", current, w, topHeight, violet)
+	} else {
+		top = lipgloss.JoinHorizontal(lipgloss.Top, panel(icon("◉", "*")+" LIVE SESSION", current, left, topHeight, violet), " ", panel(icon("▥", "#")+" WEEKLY PULSE", chart.String(), right, topHeight, cyan))
+	}
+	lowerHeight := max(3, m.height-topHeight-15)
+	if !prefs.ShowSummary {
+		lowerHeight += 6
+	}
 	savedWidth := w * 2 / 5
 	recentWidth := w - savedWidth - 1
 	savedRows := m.listView(m.favorites, 0, savedWidth, lowerHeight)
@@ -584,7 +618,7 @@ func (m model) View() string {
 	} else {
 		recentColor = cyan
 	}
-	lower := lipgloss.JoinHorizontal(lipgloss.Top, panel("3 SAVED TIMERS", savedRows, savedWidth, lowerHeight, savedColor), " ", panel("4 RECENT ENTRIES", recentRows, recentWidth, lowerHeight, recentColor))
+	lower := lipgloss.JoinHorizontal(lipgloss.Top, panel(icon("◇", "+")+" SAVED TIMERS", savedRows, savedWidth, lowerHeight, savedColor), " ", panel(icon("↺", "<")+" RECENT ENTRIES", recentRows, recentWidth, lowerHeight, recentColor))
 	summary := m.summary(now, w-5)
 	note := m.notice
 	if note == "" {
@@ -601,20 +635,40 @@ func (m model) View() string {
 	if m.busy {
 		note = "◌ Working…  " + note
 	}
-	footer := color(" N new  S stop  F save  E edit saved  Enter start  Tab switch  ↑↓ select  R sync  A account  X export  Q quit", muted)
-	return header + "\n" + top + "\n" + lower + "\n" + panel("5 TODAY BY PROJECT", summary, w, 4, muted) + "\n" + color(fit(note, w), green) + "\n" + ansi.Truncate(footer, w, "")
+	if styleNotice != "" {
+		note = styleNotice
+	}
+	footer := shortcutLine(w)
+	view := header + "\n" + top + "\n" + lower
+	if prefs.ShowSummary {
+		view += "\n" + panel(icon("≋", "=")+" TODAY BY PROJECT", summary, w, 4, muted)
+	}
+	noticeColor := green
+	if m.failed || styleNotice != "" {
+		noticeColor = red
+	}
+	view += "\n" + color(fit(note, w), noticeColor) + "\n" + ansi.Truncate(footer, w, "")
+	style := lipgloss.NewStyle().Foreground(text)
+	if !prefs.Transparent {
+		style = style.Background(background)
+	}
+	return style.Render(view)
+
 }
 func (m model) listView(entries []Entry, focus, width, height int) string {
 	var b strings.Builder
 	if len(entries) == 0 {
 		if focus == 0 {
-			return color("No saved timers yet.\n\nF creates a reusable timer.\nStart once, save it, repeat.", muted)
+			return color(icon("◇", "+")+" BUILD YOUR SHORTLIST", cyan) + "\n\n" + color("Save the work you return to.\nStart a timer, then press F.", muted)
 		}
-		return color("Connect with A to load Toggl history.", muted)
+		if m.client.Token == "" {
+			return color(icon("↺", "<")+" YOUR HISTORY, HERE", cyan) + "\n\n" + color("Press A to connect Toggl.\nYour token stays on this machine.", muted)
+		}
+		return color("No recent entries. N starts your first timer.", muted)
 	}
-	header := "TIMER                       PROJECT"
+	header := lipgloss.NewStyle().Width(max(10, (width-8)*3/5)+3).Render("  TIMER") + "PROJECT"
 	if focus == 1 {
-		header = "STARTED   DESCRIPTION                     TIME"
+		header = "  STARTED   " + lipgloss.NewStyle().Width(max(10, width-26)+1).Render("DESCRIPTION") + "TIME"
 	}
 	b.WriteString(color(fit(header, width-4), muted) + "\n")
 	start := 0
@@ -634,7 +688,7 @@ func (m model) listView(entries []Entry, focus, width, height int) string {
 		var row string
 		if focus == 0 {
 			dw := max(10, (width-8)*3/5)
-			row = fmt.Sprintf("%s%-*s %s", mark, dw, fit(desc, dw), fit(projectName(m.data, e), width-dw-7))
+			row = mark + lipgloss.NewStyle().Width(dw).Render(fit(desc, dw)) + " " + fit(projectName(m.data, e), width-dw-7)
 			if e.Billable {
 				row += " $"
 			}
@@ -644,11 +698,15 @@ func (m model) listView(entries []Entry, focus, width, height int) string {
 			if e.Duration < 0 {
 				duration = "▶" + duration
 			}
-			row = fmt.Sprintf("%s%s %-*s %s", mark, e.Start.Local().Format("Mon 15:04"), dw, fit(desc, dw), duration)
+			row = mark + e.Start.Local().Format("Mon 15:04") + " " + lipgloss.NewStyle().Width(dw).Render(fit(desc, dw)) + " " + duration
 		}
 		row = ansi.Truncate(row, width-4, "")
 		if m.focus == focus && i == m.cursor {
-			row = lipgloss.NewStyle().Background(lipgloss.Color("#383353")).Foreground(cyan).Width(width - 4).Render(row)
+			selected := lipgloss.NewStyle().Foreground(cyan).Bold(true).Width(width - 4)
+			if !prefs.Transparent {
+				selected = selected.Background(cyan).Foreground(background)
+			}
+			row = selected.Render(row)
 		} else {
 			row = color(row, text)
 		}
@@ -685,7 +743,7 @@ func (m model) summary(now time.Time, width int) string {
 			}
 		}
 	}
-	s := color("TODAY  "+hour(total)+"  ", cyan) + color(bar(total, 8*3600, min(28, width-30)), green) + color(" / 8h reference", muted) + "\n"
+	s := color("TODAY  "+hour(total)+"  ", cyan) + meter(total, int64(prefs.ReferenceHours)*3600, min(28, width-30)) + color(fmt.Sprintf(" / %dh reference", prefs.ReferenceHours), muted) + "\n"
 	for i, row := range rows {
 		if i >= 3 {
 			break
@@ -736,6 +794,7 @@ func main() {
 	flag.Parse()
 	m := initial(*demo || *snapshot)
 	if *snapshot {
+		lipgloss.SetColorProfile(termenv.TrueColor)
 		fmt.Println(m.View())
 		return
 	}

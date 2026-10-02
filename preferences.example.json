@@ -1,0 +1,11 @@
+{
+  "transparent": true,
+  "brand": true,
+  "show_week": true,
+  "show_summary": true,
+  "compact": false,
+  "icons": true,
+  "reference_hours": 8,
+  "theme_file": "",
+  "colors": {}
+}

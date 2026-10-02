@@ -1,15 +1,30 @@
 # Tempo — Toggl for Omarchy
 
+![HG Tempo · Time, well spent](assets/tempo-mark.svg)
+
+[![Go checks](https://github.com/hallgeirg/omarchy-tempo/actions/workflows/ci.yml/badge.svg)](https://github.com/hallgeirg/omarchy-tempo/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-8BD5CA)](LICENSE)
+
 A keyboard-first Toggl Track dashboard written in **Go**, with a **btop-inspired terminal interface** and a live Omarchy bar timer.
 
 Start work, repeat recent entries, and keep saved timers a keystroke away. See today's project totals and your week's activity without opening a browser.
 
 ![Tempo dashboard with fictional demo data](assets/dashboard.svg)
 
-> **Preview release:** usable baseline, still under design review. HG styling, full Omarchy theme integration, and user customization are planned before any catalog submission. The current terminal palette is fixed; full theme support is not yet implemented.
+<details>
+<summary>Same dashboard, light theme</summary>
+
+![Tempo in a light example palette](assets/dashboard-light.svg)
+
+</details>
+
+Artwork uses fictional data and example palettes. The app follows your active theme; its transparent interiors inherit your terminal’s opacity. [Make it yours →](docs/customization.md)
+
+> **Preview release:** usable baseline, still under design review. HG styling, live Omarchy theme colors, and user preferences are available for review. No catalog submission has been made.
 
 ## What you get
 
+- Theme-aware frames and accents, transparent panel interiors, an HG signature you can turn off, and configurable density/panels.
 - Live timer in the Omarchy bar; click it to open or focus the dashboard.
 - Start/stop timers, repeat recent entries, and create/edit reusable saved timers.
 - Workspace, project, tags, and billable controls when creating a timer.
@@ -59,6 +74,7 @@ Enter your token inside Tempo, never in a GitHub issue or shell command. Startin
 | **R** | Refresh Toggl data |
 | **A** | Connect or change account |
 | **X** | Export CSV |
+| **?** | Open keyboard field guide |
 | **Q** | Quit dashboard |
 
 In a form, **Tab** moves between fields, **Left/Right** changes options, and **Enter** moves to Confirm; press Enter again to submit. **Esc** cancels.
@@ -79,7 +95,7 @@ The dashboard and bar share a cache. Normal full sync uses two API reads every t
 
 Reports cover entries starting within the last fourteen days. Midnight-spanning sessions split at local day boundaries. Calendar-week totals and the eight-hour progress reference are informational, not billing reports. Historical entry editing, manual time entry, and Timery/iCloud import are not implemented in v0.1.0. No historical entry deletion endpoint is exposed.
 
-[Detailed usage](docs/usage.md) · [Troubleshooting](docs/troubleshooting.md) · [Development](CONTRIBUTING.md) · [Security](SECURITY.md)
+[Customization & translucency](docs/customization.md) · [Detailed usage](docs/usage.md) · [Troubleshooting](docs/troubleshooting.md) · [Development](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## Build from source
 

@@ -23,6 +23,7 @@ Timery's Apple/iCloud saved timers; your actual time entries live in Toggl.
 | X | Export cached entries as CSV to ~/Documents/Tempo |
 | Tab / arrows | Navigate tables; in forms Tab advances and left/right choose options |
 | Enter in a form | Move to Confirm, then submit |
+| ? | Keyboard field guide |
 | Q | Quit; running Toggl timer keeps going |
 
 Starting a timer stops the timer running in Toggl first, including one started
@@ -50,3 +51,5 @@ Build: `cd src && go build -buildvcs=false -trimpath -o ../bin/tempo-native .`
 Tests: `cd src && go test -buildvcs=false ./...`
 
 Independent of Timery and Toggl. API: https://engineering.toggl.com/docs/track/api/
+
+For themes, transparency, layout preferences, and HG branding, see [Customization](customization.md).
