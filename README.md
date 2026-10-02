@@ -56,7 +56,7 @@ The plugin ID remains `hallgeirg.timery`. If you already have an earlier local c
 1. Open your [Toggl profile](https://track.toggl.com/profile) and find your API token.
 2. Open Tempo and press **A**.
 3. Paste the token into the masked field and confirm.
-4. Press **N** to create a timer, select its workspace/project, and confirm.
+4. Press **P** to browse your projects and type to search. Select a project with **Enter**, add a description, and confirm. Or press **N** for a new timer without choosing a project first.
 
 Enter your token inside Tempo, never in a GitHub issue or shell command. Starting a timer first stops the timer currently running in Toggl, including one started on another device. **Q** closes the dashboard while the timer keeps running.
 
@@ -65,7 +65,7 @@ Enter your token inside Tempo, never in a GitHub issue or shell command. Startin
 | Key | Action |
 | --- | --- |
 | **N** | New timer |
-| **P / /** | Browse projects across workspaces; type to search |
+| **P** or **/** | Browse projects across workspaces; type to search |
 | **Ctrl+P** | Search and select a project inside a timer form |
 | **S** | Stop current Toggl timer |
 | **Enter** | Start selected saved timer or repeat recent entry |
@@ -96,11 +96,16 @@ The API token is stored locally in `~/.config/omarchy-tempo/credentials.json` wi
 
 The dashboard and bar share a cache. Normal full sync uses two API reads every ten minutes, with a fifteen-minute backoff after a failed sync. Manual refreshes and timer actions also use requests. Clocks tick locally between syncs; changes from another device may take until the next sync to appear.
 
-Reports cover entries starting within the last fourteen days. Midnight-spanning sessions split at local day boundaries. Calendar-week totals and the eight-hour progress reference are informational, not billing reports. Historical entry editing, manual time entry, and Timery/iCloud import are not implemented in v0.1.0. No historical entry deletion endpoint is exposed.
+Reports cover entries starting within the last fourteen days. Midnight-spanning sessions split at local day boundaries. Calendar-week totals and the configurable daily progress reference are informational, not billing reports. Historical entry editing, manual time entry, and Timery/iCloud import are not implemented in this preview. No historical entry deletion endpoint is exposed.
 
 [Customization & translucency](docs/customization.md) · [Detailed usage](docs/usage.md) · [Troubleshooting](docs/troubleshooting.md) · [Development](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## Build from source
+
+```bash
+git clone https://github.com/hallgeirg/omarchy-tempo.git
+cd omarchy-tempo
+```
 
 Install the Go version specified in `src/go.mod`, then:
 
