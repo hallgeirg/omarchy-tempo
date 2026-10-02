@@ -32,7 +32,7 @@ for name, palette in PALETTES.items():
         for match in SGR.finditer(line):
             part=line[previous:match.start()]
             if part:
-                spans.append(f'<tspan fill="{fill}" font-weight="{"bold" if bold else "normal"}">{html.escape(part)}</tspan>')
+                spans.append(f'<tspan fill="{fill}" font-weight="{"bold" if bold else "normal"}">{html.escape(part).replace(" ", "&#160;")}</tspan>')
             codes=[int(v or 0) for v in match.group(1).split(";")]
             i=0
             while i<len(codes):
@@ -45,7 +45,7 @@ for name, palette in PALETTES.items():
                     fill="#"+"".join(f'{v:02x}' for v in codes[i+2:i+5]);i+=4
                 i+=1
             previous=match.end()
-        if line[previous:]: spans.append(f'<tspan fill="{fill}">{html.escape(line[previous:])}</tspan>')
+        if line[previous:]: spans.append(f'<tspan fill="{fill}">{html.escape(line[previous:]).replace(" ", "&#160;")}</tspan>')
         svg.append(f'<text x="24" y="{35+y*19}">'+"".join(spans)+'</text>')
     svg+=['</g></svg>']
     (ROOT / "assets" / f"{name}.svg").write_text("\n".join(svg)+"\n")
