@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "hallgeirg.timery",
+  "id": "hg.tempo",
   "name": "Tempo \u00b7 Toggl",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Hallgeir",
   "license": "MIT",
   "description": "Timery-inspired Toggl timers in a btop-style terminal dashboard.",

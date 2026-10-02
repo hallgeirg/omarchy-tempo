@@ -46,10 +46,10 @@ omarchy plugin add https://github.com/hallgeirg/omarchy-tempo.git --enable
 Click **Tempo** in the top bar. Or launch it directly:
 
 ```bash
-~/.config/omarchy/plugins/hallgeirg.timery/bin/tempo-window
+~/.config/omarchy/plugins/hg.tempo/bin/tempo-window
 ```
 
-The plugin ID remains `hallgeirg.timery`. If you already have an earlier local copy with that ID, back it up and move it out of the plugins directory before installing; Omarchy rejects duplicate IDs. Your credentials and saved timers live separately and are not part of the plugin checkout.
+The plugin ID is `hg.tempo` on every machine. The `~` in the launch path means your own home directory. Credentials and saved timers live separately from the plugin checkout. Upgrading an early preview? See [migration instructions](docs/migration.md).
 
 ## Connect Toggl
 
@@ -85,7 +85,7 @@ In a form, **Tab** moves between fields, **Left/Right** changes options, and **E
 ## Preview without an account
 
 ```bash
-~/.config/omarchy/plugins/hallgeirg.timery/bin/tempo --demo
+~/.config/omarchy/plugins/hg.tempo/bin/tempo --demo
 ```
 
 The demo uses fictional entries and makes no account changes. Use a terminal of at least **72 columns × 26 rows**; around 120 × 42 works well. [Window sizing and troubleshooting](docs/troubleshooting.md).

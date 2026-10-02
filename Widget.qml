@@ -4,7 +4,7 @@ import qs.Commons
 import qs.Ui
 BarWidget {
   id: root
-  moduleName: "hallgeirg.timery"
+  moduleName: "hg.tempo"
   readonly property string script: Qt.resolvedUrl("bin/tempo").toString().replace(/^file:\/\//, "")
   property var state: ({})
   property double now: Date.now() / 1000

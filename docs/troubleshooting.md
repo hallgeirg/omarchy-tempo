@@ -4,17 +4,17 @@
 
 ```bash
 omarchy-shell shell rescanPlugins
-omarchy plugin enable hallgeirg.timery
+omarchy plugin enable hg.tempo
 ```
 
-Check plugin validation with `omarchy plugin validate ~/.config/omarchy/plugins/hallgeirg.timery`.
+Check plugin validation with `omarchy plugin validate ~/.config/omarchy/plugins/hg.tempo`.
 
 ## Dashboard does not open
 
 Run the launcher from a terminal to see errors:
 
 ```bash
-~/.config/omarchy/plugins/hallgeirg.timery/bin/tempo-window
+~/.config/omarchy/plugins/hg.tempo/bin/tempo-window
 ```
 
 The launcher uses Omarchy's terminal launcher and focuses an existing window with class `org.omarchy.tempo`. Check other workspaces. For a direct terminal session, run `bin/tempo` from the plugin folder.

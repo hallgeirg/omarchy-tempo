@@ -9,7 +9,7 @@ By default Tempo leaves panel interiors and selected rows transparent. Your term
 Keep your terminal's existing background opacity, or configure an app-specific terminal profile. For a separate Ghostty preview:
 
 ```bash
-ghostty --background-opacity=0.82 --class=org.omarchy.tempo-preview -e ~/.config/omarchy/plugins/hallgeirg.timery/bin/tempo --demo
+ghostty --background-opacity=0.82 --class=org.omarchy.tempo-preview -e ~/.config/omarchy/plugins/hg.tempo/bin/tempo --demo
 ```
 
 Choose a value from 0 to 1. This example applies only to that window and does not change your global terminal config. Blur depends on your compositor settings.
@@ -20,7 +20,7 @@ Copy the example once, then edit it:
 
 ```bash
 mkdir -p ~/.config/omarchy-tempo
-cp ~/.config/omarchy/plugins/hallgeirg.timery/preferences.example.json ~/.config/omarchy-tempo/preferences.json
+cp ~/.config/omarchy/plugins/hg.tempo/preferences.example.json ~/.config/omarchy-tempo/preferences.json
 ```
 
 Do not overwrite an existing preferences file unless you intend to reset it. All keys are optional; omitted values keep their defaults.
