@@ -13,6 +13,7 @@ PALETTES = {
     "dashboard": {"background":"#181425", "foreground":"#E0DAF0", "accent":"#8BD5CA", "color5":"#C6A0F6", "color2":"#A6DA95", "color8":"#9A93AC", "color1":"#ED8796"},
     "dashboard-light": {"background":"#F5F1EB", "foreground":"#292735", "accent":"#006D77", "color5":"#7552A3", "color2":"#376A32", "color8":"#6D6676", "color1":"#A73144"},
 }
+PALETTES.update({"project-browser": PALETTES["dashboard"], "timer-form": PALETTES["dashboard"]})
 SGR = re.compile(r"\x1b\[([0-9;]*)m")
 for name, palette in PALETTES.items():
     with tempfile.TemporaryDirectory(prefix="tempo-art-") as tmp:
@@ -20,7 +21,10 @@ for name, palette in PALETTES.items():
         theme = home / ".local/state/omarchy/current/theme"
         theme.mkdir(parents=True)
         (theme / "colors.toml").write_text("\n".join(f'{k} = "{v}"' for k, v in palette.items()))
-        rendered = subprocess.check_output([str(ROOT / "bin/tempo"), "--render"], env={**os.environ, "HOME":tmp}, text=True)
+        flags = ["--render"]
+        if name == "project-browser": flags.append("--projects")
+        if name == "timer-form": flags.append("--new")
+        rendered = subprocess.check_output([str(ROOT / "bin/tempo"), *flags], env={**os.environ, "HOME":tmp}, text=True)
     lines = rendered.splitlines()
     height = len(lines)*19 + 60
     svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="{height}" viewBox="0 0 1120 {height}">',

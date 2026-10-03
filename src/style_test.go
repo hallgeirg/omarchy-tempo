@@ -68,3 +68,27 @@ func TestResponsivePanelOptions(t *testing.T) {
 		}
 	}
 }
+
+func TestTimerFormsFitAndExplainActions(t *testing.T) {
+	for _, size := range [][2]int{{72, 26}, {120, 42}} {
+		for _, mode := range []string{"new", "save", "edit-saved"} {
+			m := initial(true)
+			m.width = size[0]
+			m.height = size[1]
+			m.openForm(mode, Entry{})
+			view := m.View()
+			if len(strings.Split(view, "\n")) > m.height {
+				t.Fatal("form height overflow")
+			}
+			for _, line := range strings.Split(view, "\n") {
+				if ansi.StringWidth(line) > m.width {
+					t.Fatal("form width overflow")
+				}
+			}
+			plain := ansi.Strip(view)
+			if mode != "new" && (!strings.Contains(plain, "SAVE TIMER") || !strings.Contains(plain, "unchanged")) {
+				t.Fatal("saving must not imply a Toggl timer switch")
+			}
+		}
+	}
+}

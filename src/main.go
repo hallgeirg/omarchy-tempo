@@ -280,6 +280,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if m.mode != "" && m.mode != "account" && m.mode != "help" && key == "ctrl+p" {
 			en := m.form
+			en.Project = nil
 			en.Description = m.inputs[0].Value()
 			en.Tags = nil
 			for _, tag := range strings.Split(m.inputs[1].Value(), ",") {
@@ -535,6 +536,9 @@ func (m model) formView() string {
 	if m.mode == "save" || m.mode == "edit-saved" {
 		title = "SAVE A TIMER"
 	}
+	if m.mode == "edit-saved" {
+		title = "EDIT SAVED TIMER"
+	}
 	if m.mode == "account" {
 		body := color("CONNECT YOUR TOGGL ACCOUNT", cyan) + "\n\nProfile → API Token in Toggl Track\n\n" + m.inputs[2].View() + "\n\nToken stays in a private local file (0600).\n\n" + color("Enter connect  /  Esc cancel", violet) + "\n\n" + color(fit(m.notice, 60), red)
 		return lipgloss.Place(m.width, max(20, m.height-2), lipgloss.Center, lipgloss.Center, panel("ACCOUNT", body, 66, 14, violet))
@@ -553,20 +557,37 @@ func (m model) formView() string {
 	if m.form.Billable {
 		billable = "● Billable"
 	}
-	rows := []string{"Description   " + m.inputs[0].View(), "Workspace     ‹ " + fit(workspace, 40) + " ›", "Project       ‹ " + fit(project, 40) + " ›", "Tags          " + m.inputs[1].View(), "Billing       " + billable, "[ Confirm ]"}
-	var body strings.Builder
-	body.WriteString(color(title, cyan) + "\n\n")
-	for i, row := range rows {
-		if i == m.field {
-			body.WriteString(color("▸ "+row, cyan))
-		} else {
-			body.WriteString("  " + row)
-		}
-		body.WriteString("\n\n")
+	labels := []string{"DESCRIPTION", "WORKSPACE", "PROJECT", "TAGS", "BILLING", "CONFIRM"}
+	values := []string{m.inputs[0].View(), "‹ " + fit(workspace, 48) + " ›", "‹ " + fit(project, 48) + " ›", m.inputs[1].View(), billable, "[ START TIMER ]"}
+	actionNote := "Start a new Toggl timer."
+	if m.mode == "save" || m.mode == "edit-saved" {
+		values[5] = "[ SAVE TIMER ]"
+		actionNote = "Saved locally · your running timer stays unchanged."
+	} else if m.data.Current != nil {
+		actionNote = "Starting replaces: " + m.data.Current.Description
 	}
-	body.WriteString(color("Tab next · ← → choices · Ctrl+P projects · Enter confirm", muted) + "\n\n")
-	body.WriteString("Starting switches from the current Toggl timer.")
-	return lipgloss.Place(m.width, max(25, m.height-2), lipgloss.Center, lipgloss.Center, panel("TIMER", body.String(), min(76, m.width-2), 21, violet))
+	var body strings.Builder
+	intro := "SET UP YOUR SESSION"
+	if m.mode == "save" || m.mode == "edit-saved" {
+		intro = "MAKE IT REUSABLE"
+	}
+	body.WriteString(color(intro, cyan) + color(fmt.Sprintf("    %d / 6", m.field+1), muted) + "\n\n")
+	for i, label := range labels {
+		mark := "  "
+		c := muted
+		if i == m.field {
+			mark = icon("▸ ", "> ")
+			c = cyan
+		}
+		body.WriteString(color(mark+label, c) + "\n    " + values[i] + "\n")
+	}
+	body.WriteString("\n" + color(fit(actionNote, 62), muted) + "\n")
+	if m.notice != "" && m.failed {
+		body.WriteString(color(fit(m.notice, 62), red) + "\n")
+	}
+	body.WriteString(keycap("Tab", "next") + "  " + keycap("Ctrl+P", "projects") + "  " + keycap("Enter", "confirm") + "  " + keycap("Esc", "cancel"))
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, panel("TIMER / "+title, body.String(), min(76, m.width-2), 20, violet))
+
 }
 func (m model) View() string {
 	if m.width < 72 || m.height < 26 {
@@ -599,7 +620,10 @@ func (m model) View() string {
 	en := m.data.Current
 	title := icon("○", "o") + " READY WHEN YOU ARE"
 	secs := int64(0)
-	detail := "N starts a timer · Enter repeats selected entry"
+	detail := "P finds a project · N starts fresh"
+	if m.client.Token == "" && !m.demo {
+		detail = "Press A to connect your Toggl account"
+	}
 	if en != nil {
 		title = icon("▶", ">") + " " + en.Description
 		secs = elapsed(*en, now)
@@ -649,7 +673,7 @@ func (m model) View() string {
 	} else {
 		recentColor = cyan
 	}
-	lower := lipgloss.JoinHorizontal(lipgloss.Top, panel(icon("◇", "+")+" SAVED TIMERS", savedRows, savedWidth, lowerHeight, savedColor), " ", panel(icon("↺", "<")+" RECENT ENTRIES", recentRows, recentWidth, lowerHeight, recentColor))
+	lower := lipgloss.JoinHorizontal(lipgloss.Top, panel(icon("◇", "+")+fmt.Sprintf(" SAVED TIMERS / %d", len(m.favorites)), savedRows, savedWidth, lowerHeight, savedColor), " ", panel(icon("↺", "<")+fmt.Sprintf(" RECENT ENTRIES / %d", len(m.data.Entries)), recentRows, recentWidth, lowerHeight, recentColor))
 	summary := m.summary(now, w-5)
 	note := m.notice
 	if note == "" {
@@ -820,11 +844,19 @@ func main() {
 		fmt.Println(string(b))
 		return
 	}
+	newTimer := flag.Bool("new", false, "Open a new timer form")
 	projects := flag.Bool("projects", false, "Open the searchable project explorer")
 	demo := flag.Bool("demo", false, "Preview sample data without changing Toggl")
 	snapshot := flag.Bool("render", false, "Render demo dashboard once for inspection")
 	flag.Parse()
 	m := initial(*demo || *snapshot)
+	if *newTimer {
+		if len(m.data.Workspaces) == 0 {
+			m.connect()
+		} else {
+			m.openForm("new", Entry{})
+		}
+	}
 	if *projects {
 		m.openProjects("", Entry{})
 	}

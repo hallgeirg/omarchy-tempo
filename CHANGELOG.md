@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 — 2026-10-03
+
+Adaptive project explorer with a details panel and cached activity, clearer timer forms and confirmation wording, focused-field progress, search clearing, dashboard list counts, and workflow previews.
+
 ## 0.3.0 — 2026-10-02
 
 Searchable project explorer and neutral `hg.tempo` plugin ID. See migration instructions for early previews. README artwork now preserves spacing in browsers.

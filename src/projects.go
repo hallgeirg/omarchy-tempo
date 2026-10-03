@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"sort"
 	"strings"
+	"time"
 )
 
 func workspaceOf(p Named) int64 {
@@ -77,6 +78,10 @@ func (m *model) projectsUpdate(msg tea.KeyMsg) tea.Cmd {
 			m.mode = ""
 		}
 		return nil
+	case "ctrl+u":
+		m.search.SetValue("")
+		m.projectCursor = 0
+		return nil
 	case "up":
 		m.projectCursor = max(0, m.projectCursor-1)
 		return nil
@@ -126,60 +131,86 @@ func (m *model) projectsUpdate(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 func (m model) projectsView() string {
-	width := m.width - 4
-	height := m.height - 4
 	rows := m.matchingProjects()
+	width := min(m.width-4, 124)
+	height := min(m.height-4, max(18, len(rows)+9))
 	scope := "ALL PROJECTS"
 	if m.activeOnly {
 		scope = "ACTIVE PROJECTS"
 	}
 	search := m.search
-	search.Width = max(20, width-8)
-	body := color(scope, cyan) + color(fmt.Sprintf("  /  %d matches · %d total", len(rows), len(m.data.Projects)), muted) + "\n" + search.View() + "\n\n"
-	listHeight := max(1, height-9)
-	start := 0
-	if m.projectCursor >= listHeight {
-		start = m.projectCursor - listHeight + 1
+	search.Width = max(20, width-10)
+	heading := color(scope, cyan) + color(fmt.Sprintf("  /  %d matches · %d total", len(rows), len(m.data.Projects)), muted) + "\n" + search.View() + "\n"
+	detailWidth := 0
+	listWidth := width
+	if width >= 100 && len(rows) > 0 {
+		detailWidth = 34
+		listWidth = width - detailWidth - 1
 	}
+	listHeight := max(4, height-8)
+	start := max(0, m.projectCursor-listHeight+1)
+	body := color(lipgloss.NewStyle().Width(max(12, listWidth/2)).Render("  PROJECT")+"WORKSPACE", muted) + "\n"
 	if len(rows) == 0 {
-		message := "No matching projects. Try another word."
+		message := "No matches. Try a project, client, or workspace name."
 		if len(m.data.Projects) == 0 {
 			message = "No projects cached. Esc returns · A connects · R refreshes."
 		}
-		body += color(message, muted) + "\n"
+		body += color(fit(message, listWidth-4), muted)
 	} else {
 		for i := start; i < len(rows) && i < start+listHeight; i++ {
 			p := rows[i]
 			mark := "  "
-			state := "active"
-			if p.Active != nil && !*p.Active {
-				state = "archived"
-			} else if p.CanTrack != nil && !*p.CanTrack {
-				state = "read-only"
-			}
 			if i == m.projectCursor {
 				mark = icon("▸ ", "> ")
 			}
-			nameWidth := max(12, width/2-7)
-			row := mark + lipgloss.NewStyle().Width(nameWidth).Render(fit(p.Name, nameWidth)) + "  " + fit(m.workspaceName(workspaceOf(p))+" / "+state, width-nameWidth-8)
-			c := text
-			if i == m.projectCursor {
-				c = cyan
+			nameWidth := max(12, listWidth/2-2)
+			state := ""
+			if p.Active != nil && !*p.Active {
+				state = " [archived]"
+			} else if p.CanTrack != nil && !*p.CanTrack {
+				state = " [read-only]"
 			}
-			body += color(row, c) + "\n"
+			row := mark + lipgloss.NewStyle().Width(nameWidth).Render(fit(p.Name, nameWidth)) + " " + fit(m.workspaceName(workspaceOf(p))+state, listWidth-nameWidth-7)
+			style := lipgloss.NewStyle().Foreground(text)
+			if i == m.projectCursor {
+				style = style.Foreground(cyan).Bold(true)
+			}
+			body += style.Render(row) + "\n"
 		}
 	}
-	body += strings.Repeat("\n", max(0, listHeight-min(listHeight, len(rows))))
-	detail := "Select a project, then Enter to configure a timer."
+	body = lipgloss.NewStyle().Width(listWidth - 4).Height(listHeight + 1).Render(body)
+	detail := "Ctrl+U clears search · Enter opens the timer form."
 	if len(rows) > 0 {
 		p := rows[min(m.projectCursor, len(rows)-1)]
-		if p.ClientName != "" {
-			detail = "Client: " + p.ClientName + " · " + detail
+		if detailWidth > 0 {
+			state := "Ready to track"
+			if p.Active != nil && !*p.Active {
+				state = "Archived"
+			} else if p.CanTrack != nil && !*p.CanTrack {
+				state = "Read-only"
+			}
+			info := color(fit(p.Name, detailWidth-4), cyan) + "\n\n" + color("WORKSPACE", muted) + "\n" + fit(m.workspaceName(workspaceOf(p)), detailWidth-4) + "\n\n"
+			if p.ClientName != "" {
+				info += color("CLIENT", muted) + "\n" + fit(p.ClientName, detailWidth-4) + "\n\n"
+			}
+			var total int64
+			count := 0
+			for _, e := range m.data.Entries {
+				if e.Project != nil && *e.Project == p.ID && e.Workspace == workspaceOf(p) {
+					total += elapsed(e, time.Now())
+					count++
+				}
+			}
+			info += color("CACHED ACTIVITY", muted) + "\n" + hour(total) + fmt.Sprintf(" · %d entries", count) + "\n\n" + color(state, green)
+			body = lipgloss.JoinHorizontal(lipgloss.Top, body, " ", panel("PROJECT", info, detailWidth, listHeight-1, violet))
+		} else if p.ClientName != "" {
+			detail = "Client: " + p.ClientName + " · Enter opens a timer form"
 		}
 	}
 	if m.notice != "" {
 		detail = m.notice
 	}
-	body += "\n" + color(fit(detail, width-4), muted) + "\n" + keycap("↑↓", "select") + "  " + keycap("Tab", "active/all") + "  " + keycap("Enter", "open") + "  " + keycap("Esc", "back")
-	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, panel(icon("⌕", "/")+" PROJECT EXPLORER", body, width, height-2, cyan))
+	footer := keycap("↑↓", "select") + "  " + keycap("Tab", "active/all") + "  " + keycap("Enter", "open") + "  " + keycap("Esc", "back")
+	content := heading + "\n" + body + "\n" + color(fit(detail, width-4), muted) + "\n" + footer
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, panel(icon("⌕", "/")+" PROJECT EXPLORER", content, width, height, cyan))
 }
