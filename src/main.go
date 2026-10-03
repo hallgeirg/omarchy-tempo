@@ -52,10 +52,17 @@ func panel(title, body string, width, height int, c lipgloss.Color) string {
 	if len(lines) > height {
 		lines = lines[:height]
 	}
-	heading := color("╭─ "+title+" ", c)
-	padding := max(0, width-lipgloss.Width(heading)-1)
-	heading += color(strings.Repeat("─", padding)+"╮", c)
-	content := lipgloss.NewStyle().Border(lipgloss.Border{Left: "│", Right: "│", Bottom: "─", BottomLeft: "╰", BottomRight: "╯"}, false, true, true, true).BorderForeground(c).Padding(0, 1).Width(width - 2).Height(height).Render(strings.Join(lines, "\n"))
+	tl, tr, bl, br, horizontal, vertical := "╭", "╮", "╰", "╯", "─", "│"
+	if prefs.Style == "neon" {
+		tl, tr, bl, br, horizontal, vertical = "╔", "╗", "╚", "╝", "═", "║"
+	}
+	if prefs.Style == "makemore" {
+		tl, tr, bl, br = "┌", "┐", "└", "┘"
+	}
+	headingText := tl + horizontal + " " + title + " "
+	padding := max(0, width-lipgloss.Width(headingText)-1)
+	heading := accentText(headingText+strings.Repeat(horizontal, padding)+tr, c)
+	content := lipgloss.NewStyle().Border(lipgloss.Border{Left: vertical, Right: vertical, Bottom: horizontal, BottomLeft: bl, BottomRight: br}, false, true, true, true).BorderForeground(c).Padding(0, 1).Width(width - 2).Height(height).Render(strings.Join(lines, "\n"))
 	return heading + "\n" + content
 }
 
@@ -77,7 +84,7 @@ func bigClock(s string) string {
 			rows[i] += g[i] + " "
 		}
 	}
-	return color(strings.Join(rows[:], "\n"), cyan)
+	return accentText(strings.Join(rows[:], "\n"), cyan)
 }
 
 type tickMsg time.Time
@@ -306,6 +313,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 		switch key {
+		case "t":
+			if e := cycleStyle(); e != nil {
+				m.notice = e.Error()
+				m.failed = true
+			} else {
+				m.notice = "Style: " + prefs.Style
+				m.failed = false
+				m.styleInputs()
+			}
 		case "p", "/":
 			m.openProjects("", Entry{})
 			return m, textinput.Blink

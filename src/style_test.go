@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 	"os"
 	"path/filepath"
@@ -90,5 +91,30 @@ func TestTimerFormsFitAndExplainActions(t *testing.T) {
 				t.Fatal("saving must not imply a Toggl timer switch")
 			}
 		}
+	}
+}
+
+func TestEditionOverridesAndLayout(t *testing.T) {
+	defer refreshStyle()
+	for _, edition := range []string{"theme", "neon", "gradient", "makemore"} {
+		t.Run(edition, func(t *testing.T) {
+			dir := t.TempDir()
+			path := filepath.Join(dir, "preferences.json")
+			if err := os.WriteFile(path, []byte(`{"style":"`+edition+`","colors":{"accent":"#123456"}}`), 0600); err != nil {
+				t.Fatal(err)
+			}
+			m := initial(true)
+			loadStyle(path, filepath.Join(dir, "missing"))
+			if string(cyan) != "#123456" {
+				t.Fatal("custom accent must override preset")
+			}
+			for _, size := range [][2]int{{72, 26}, {120, 42}} {
+				m.width, m.height = size[0], size[1]
+				view := m.View()
+				if lipgloss.Width(view) > size[0] || lipgloss.Height(view) > size[1] {
+					t.Fatalf("edition exceeds viewport %v", size)
+				}
+			}
+		})
 	}
 }

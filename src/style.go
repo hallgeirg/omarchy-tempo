@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -13,6 +14,7 @@ import (
 
 // Preferences are deliberately separate from credentials and timer data.
 type Preferences struct {
+	Style          string            `json:"style"`
 	Transparent    bool              `json:"transparent"`
 	Brand          bool              `json:"brand"`
 	ShowWeek       bool              `json:"show_week"`
@@ -31,7 +33,7 @@ var hexColor = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
 var themeLine = regexp.MustCompile(`^\s*([a-zA-Z0-9_]+)\s*=\s*["'](#[0-9a-fA-F]{6})["']`)
 
 func defaults() Preferences {
-	return Preferences{Transparent: true, Brand: true, ShowWeek: true, ShowSummary: true, Icons: true, ReferenceHours: 8, Colors: map[string]string{}}
+	return Preferences{Style: "theme", Transparent: true, Brand: true, ShowWeek: true, ShowSummary: true, Icons: true, ReferenceHours: 8, Colors: map[string]string{}}
 }
 func themeValues(path string) map[string]string {
 	values := map[string]string{}
@@ -56,6 +58,12 @@ func loadStyle(config, theme string) {
 			styleNotice = "Invalid preferences · using defaults"
 		}
 	}
+	switch p.Style {
+	case "theme", "neon", "gradient", "makemore":
+	default:
+		p.Style = "theme"
+		styleNotice = "Unknown style · using Omarchy theme"
+	}
 	p.ReferenceHours = max(1, min(24, p.ReferenceHours))
 	prefs = p
 	if p.ThemeFile != "" {
@@ -69,6 +77,13 @@ func loadStyle(config, theme string) {
 		if v := t[key]; v != "" {
 			roles[role] = v
 		}
+	}
+	presets := map[string]map[string]string{
+		"neon":     {"accent": "#00F5D4", "secondary": "#FF4FD8", "success": "#B6FF6C", "foreground": "#EAFBFF", "muted": "#8798B0", "background": "#0B1020", "error": "#FF657A"},
+		"makemore": {"accent": "#3374FF", "secondary": "#0051FF", "success": "#68DDB0", "foreground": "#F5F5F7", "muted": "#9C9CA8", "background": "#0B0B0C", "error": "#FF7285"},
+	}
+	for role, v := range presets[p.Style] {
+		roles[role] = v
 	}
 	for role, v := range p.Colors {
 		if _, ok := roles[role]; !ok {
@@ -111,16 +126,22 @@ func wordmark(width int) string {
 			mark = "HG / TEMPO"
 		}
 	}
-	return color(mark, cyan)
+	if prefs.Brand && prefs.Style == "makemore" {
+		mark = "MAKE MORE / TEMPO     Every second counts.."
+		if width < 90 {
+			mark = "MAKE MORE / TEMPO"
+		}
+	}
+	return accentText(mark, cyan)
 }
 func meter(n, total int64, width int) string {
 	filled := min(width, max(0, int(float64(n)/float64(max(1, total))*float64(width))))
 	return color(strings.Repeat(icon("━", "="), filled), green) + color(strings.Repeat(icon("┄", "-"), max(0, width-filled)), muted)
 }
 func shortcutLine(width int) string {
-	actions := [][2]string{{"N", "new"}, {"P", "projects"}, {"S", "stop"}, {"Enter", "start"}, {"Tab", "switch"}, {"?", "help"}, {"Q", "quit"}}
+	actions := [][2]string{{"N", "new"}, {"P", "projects"}, {"S", "stop"}, {"Enter", "start"}, {"Tab", "switch"}, {"T", "style"}, {"?", "help"}, {"Q", "quit"}}
 	if width < 85 {
-		actions = [][2]string{{"N", "new"}, {"P", "projects"}, {"Enter", "start"}, {"?", "help"}, {"Q", "quit"}}
+		actions = [][2]string{{"N", "new"}, {"P", "projects"}, {"Enter", "start"}, {"T", "style"}, {"?", "help"}, {"Q", "quit"}}
 	}
 	var parts []string
 	for _, a := range actions {
@@ -130,7 +151,7 @@ func shortcutLine(width int) string {
 }
 func (m model) helpView() string {
 	body := color("MAKE EVERY KEYSTROKE COUNT", cyan) + "\n\n"
-	for _, row := range [][2]string{{"P / /", "Browse all projects · type to search"}, {"Ctrl+P", "Search projects while editing a timer"}, {"N", "Create a timer · workspace, project, tags, billing"}, {"S", "Stop the current Toggl timer"}, {"Enter", "Start selected saved timer / repeat recent entry"}, {"F / E", "Save a timer / edit selected saved timer"}, {"Delete", "Remove a local saved timer"}, {"Tab / arrows", "Switch lists; Up/Down or J/K selects a row"}, {"R / A", "Sync Toggl / connect account"}, {"X", "Export cached entries as CSV"}, {"Q", "Quit · your timer keeps running"}} {
+	for _, row := range [][2]string{{"P / /", "Browse all projects · type to search"}, {"Ctrl+P", "Search projects while editing a timer"}, {"N", "Create a timer · workspace, project, tags, billing"}, {"S", "Stop the current Toggl timer"}, {"Enter", "Start selected saved timer / repeat recent entry"}, {"F / E", "Save a timer / edit selected saved timer"}, {"Delete", "Remove a local saved timer"}, {"Tab / arrows", "Switch lists; Up/Down or J/K selects a row"}, {"T", "Cycle Theme / Neon / Gradient / Make More"}, {"R / A", "Sync Toggl / connect account"}, {"X", "Export cached entries as CSV"}, {"Q", "Quit · your timer keeps running"}} {
 		body += fmt.Sprintf("%-15s %s\n", row[0], row[1])
 	}
 	body += "\n" + color("Preferences: ~/.config/omarchy-tempo/preferences.json", muted) + "\n" + color("? or Esc closes help", cyan)
@@ -144,4 +165,79 @@ func (m *model) styleInputs() {
 		m.inputs[i].PlaceholderStyle = lipgloss.NewStyle().Foreground(muted)
 		m.inputs[i].Cursor.Style = lipgloss.NewStyle().Foreground(cyan)
 	}
+}
+
+// Gradients are static and follow the selected theme's two accent colors.
+func accentText(s string, fallback lipgloss.Color) string {
+	if prefs.Style != "gradient" || !hexColor.MatchString(string(cyan)) || !hexColor.MatchString(string(violet)) {
+		return color(s, fallback)
+	}
+	a, _ := strconv.ParseUint(string(cyan)[1:], 16, 32)
+	b, _ := strconv.ParseUint(string(violet)[1:], 16, 32)
+	lines := strings.Split(s, "\n")
+	for j, line := range lines {
+		runes := []rune(line)
+		var out strings.Builder
+		for i, ch := range runes {
+			t := float64(i) / float64(max(1, len(runes)-1))
+			var rgb [3]int
+			for k, shift := range []uint{16, 8, 0} {
+				x := float64((a >> shift) & 255)
+				y := float64((b >> shift) & 255)
+				rgb[k] = int(x + (y-x)*t)
+			}
+			out.WriteString(color(string(ch), lipgloss.Color(fmt.Sprintf("#%02x%02x%02x", rgb[0], rgb[1], rgb[2]))))
+		}
+		lines[j] = out.String()
+	}
+	return strings.Join(lines, "\n")
+}
+
+func cycleStyle() error {
+	h, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	path := filepath.Join(h, ".config/omarchy-tempo/preferences.json")
+	values := map[string]any{}
+	if b, e := os.ReadFile(path); e == nil {
+		if e = json.Unmarshal(b, &values); e != nil {
+			return fmt.Errorf("Fix preferences JSON before switching styles")
+		}
+	} else if !os.IsNotExist(e) {
+		return e
+	}
+	styles := []string{"theme", "neon", "gradient", "makemore"}
+	next := "theme"
+	for i, s := range styles {
+		if s == prefs.Style {
+			next = styles[(i+1)%len(styles)]
+			break
+		}
+	}
+	values["style"] = next
+	b, err := json.MarshalIndent(values, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err = os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		return err
+	}
+	f, err := os.CreateTemp(filepath.Dir(path), ".preferences-*")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(f.Name())
+	if _, err = f.Write(append(b, '\n')); err != nil {
+		f.Close()
+		return err
+	}
+	if err = f.Close(); err != nil {
+		return err
+	}
+	if err = os.Rename(f.Name(), path); err != nil {
+		return err
+	}
+	refreshStyle()
+	return nil
 }

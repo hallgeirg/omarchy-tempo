@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+
+- Added Neon, theme-driven Gradient, and Make More editions.
+- Press T to switch styles; custom colors and transparency remain configurable.
+- Added visual previews and viewport checks for every edition.
+
 ## 0.4.0 — 2026-10-03
 
 Adaptive project explorer with a details panel and cached activity, clearer timer forms and confirmation wording, focused-field progress, search clearing, dashboard list counts, and workflow previews.

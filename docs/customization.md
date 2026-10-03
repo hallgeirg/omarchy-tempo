@@ -57,3 +57,14 @@ Invalid JSON falls back to defaults with a visible notice; invalid color overrid
 ## Current boundaries
 
 Colors, transparency behavior, decorative markers, density, the weekly/today panels, branding, and the daily reference are configurable. Saved/recent lists remain visible. Shortcut remapping, arbitrary panel rearrangement, localized formats, and configurable week start are not yet implemented. The big timer uses block glyphs even with simpler markers; a monospaced Unicode font is recommended. Nerd Font icons are not required.
+
+## Visual editions
+
+Press **T** on the dashboard to cycle through `theme`, `neon`, `gradient`, and `makemore`. Your choice is saved locally, preserving your other settings. Or set `"style": "neon"` in preferences.json.
+
+- **Theme** follows Omarchy's active colors and uses rounded frames (default).
+- **Neon** uses cyan/pink highlights, double frames, and a dark navy base.
+- **Gradient** blends the active theme's accent and secondary colors across headings and the clock. The gradient is static.
+- **Make More** uses royal blue accents, square frames, and a MAKE MORE signature when branding is enabled.
+
+All editions respect `transparent`, `brand`, `icons`, and panel settings. Explicit `colors` overrides always win over a preset. Gradient follows theme changes; Neon and Make More supply their own default colors. Actual translucency is controlled by your terminal's opacity; Tempo leaves interiors unpainted when transparent is true.

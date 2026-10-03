@@ -27,6 +27,17 @@ Start work, repeat recent entries, and keep saved timers a keystroke away. See t
 
 </details>
 
+<details>
+<summary>Neon, Gradient, and Make More editions — press T to switch</summary>
+
+![Neon edition](assets/neon.svg)
+
+![Gradient edition](assets/gradient.svg)
+
+![Make More edition](assets/makemore.svg)
+
+</details>
+
 Artwork uses fictional data and example palettes. The app follows your active theme; its transparent interiors inherit your terminal’s opacity. [Make it yours →](docs/customization.md)
 
 > **Preview release:** usable baseline, still under design review. HG styling, live Omarchy theme colors, and user preferences are available for review. No catalog submission has been made.

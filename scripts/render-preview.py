@@ -14,6 +14,8 @@ PALETTES = {
     "dashboard-light": {"background":"#F5F1EB", "foreground":"#292735", "accent":"#006D77", "color5":"#7552A3", "color2":"#376A32", "color8":"#6D6676", "color1":"#A73144"},
 }
 PALETTES.update({"project-browser": PALETTES["dashboard"], "timer-form": PALETTES["dashboard"]})
+for style, bg in [("neon", "#0B1020"), ("gradient", "#181425"), ("makemore", "#0B0B0C")]:
+    PALETTES[style] = {**PALETTES["dashboard"], "background": bg}
 SGR = re.compile(r"\x1b\[([0-9;]*)m")
 for name, palette in PALETTES.items():
     with tempfile.TemporaryDirectory(prefix="tempo-art-") as tmp:
@@ -21,6 +23,10 @@ for name, palette in PALETTES.items():
         theme = home / ".local/state/omarchy/current/theme"
         theme.mkdir(parents=True)
         (theme / "colors.toml").write_text("\n".join(f'{k} = "{v}"' for k, v in palette.items()))
+        if name in ("neon", "gradient", "makemore"):
+            config = home / ".config/omarchy-tempo"
+            config.mkdir(parents=True)
+            (config / "preferences.json").write_text(json.dumps({"style": name}))
         flags = ["--render"]
         if name == "project-browser": flags.append("--projects")
         if name == "timer-form": flags.append("--new")
