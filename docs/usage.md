@@ -61,3 +61,7 @@ For themes, transparency, layout preferences, and HG branding, see [Customizatio
 Press P or / from the dashboard. Type to search project names, clients, and workspaces; multiple words must all match. Up/Down selects, Page Up/Down moves ten rows, Tab toggles active/all, Enter opens a timer form, and Esc returns. Archived/read-only projects are visible but cannot start timers. The list uses your shared cached Toggl project data; refresh from the dashboard to load changes. Inside a timer form, Ctrl+P opens this browser while preserving the description, tags, and billing selection. Selecting a project opens the form; it never starts a timer without confirmation.
 
 The project explorer sizes itself to its results. Wider terminals show workspace, client, and cached activity beside the list; totals cover cached history, not all-time reporting. Ctrl+U clears the search. Timer forms distinguish starting a timer from saving a local preset and show which field is focused. `bin/tempo --demo --projects` and `bin/tempo --demo --new` open those screens with sample data.
+
+## Navigating longer lists
+
+Saved and recent panels show the selected position in their headings. Page Up/Down moves ten rows; Home/End selects the first/last row. The project explorer supports the same keys and shows the visible result range. Help and quit shortcuts stay visible at the minimum terminal size. Failed local timer saves leave the form open with your draft intact.

@@ -147,18 +147,22 @@ func shortcutLine(width int) string {
 	for _, a := range actions {
 		parts = append(parts, keycap(a[0], a[1]))
 	}
-	return lipgloss.NewStyle().Width(width).Render(strings.Join(parts, "  "))
+	return lipgloss.NewStyle().Width(width).Render(strings.Join(parts, " "))
 }
 func (m model) helpView() string {
 	body := color("MAKE EVERY KEYSTROKE COUNT", cyan) + "\n\n"
-	for _, row := range [][2]string{{"P / /", "Browse all projects · type to search"}, {"Ctrl+P", "Search projects while editing a timer"}, {"N", "Create a timer · workspace, project, tags, billing"}, {"S", "Stop the current Toggl timer"}, {"Enter", "Start selected saved timer / repeat recent entry"}, {"F / E", "Save a timer / edit selected saved timer"}, {"Delete", "Remove a local saved timer"}, {"Tab / arrows", "Switch lists; Up/Down or J/K selects a row"}, {"T", "Cycle Theme / Neon / Gradient / Make More"}, {"R / A", "Sync Toggl / connect account"}, {"X", "Export cached entries as CSV"}, {"Q", "Quit · your timer keeps running"}} {
+	for _, row := range [][2]string{{"P / /", "Browse all projects · type to search"}, {"Ctrl+P", "Search projects while editing a timer"}, {"N", "Create a timer · workspace, project, tags, billing"}, {"S", "Stop the current Toggl timer"}, {"Enter", "Start selected saved timer / repeat recent entry"}, {"F / E", "Save a timer / edit selected saved timer"}, {"Delete", "Remove a local saved timer"}, {"Tab / arrows", "Switch lists; Up/Down or J/K selects a row"}, {"PgUp / PgDn", "Move ten rows · Home/End jumps to first/last"}, {"T", "Cycle Theme / Neon / Gradient / Make More"}, {"R / A", "Sync Toggl / connect account"}, {"X", "Export cached entries as CSV"}, {"Q", "Quit · your timer keeps running"}} {
 		body += fmt.Sprintf("%-15s %s\n", row[0], row[1])
 	}
 	body += "\n" + color("Preferences: ~/.config/omarchy-tempo/preferences.json", muted) + "\n" + color("? or Esc closes help", cyan)
-	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, panel("? FIELD GUIDE", body, min(76, m.width-2), 19, violet))
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, panel("? FIELD GUIDE", body, min(76, m.width-2), 20, violet))
 }
 
 func (m *model) styleInputs() {
+	m.search.PromptStyle = lipgloss.NewStyle().Foreground(cyan)
+	m.search.TextStyle = lipgloss.NewStyle().Foreground(text)
+	m.search.PlaceholderStyle = lipgloss.NewStyle().Foreground(muted)
+	m.search.Cursor.Style = lipgloss.NewStyle().Foreground(cyan)
 	for i := range m.inputs {
 		m.inputs[i].PromptStyle = lipgloss.NewStyle().Foreground(cyan)
 		m.inputs[i].TextStyle = lipgloss.NewStyle().Foreground(text)

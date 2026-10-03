@@ -73,3 +73,28 @@ func TestProjectExplorerFitsAndScrolls(t *testing.T) {
 		}
 	}
 }
+
+func TestProjectDetailsRemainVisibleAndPageNavigation(t *testing.T) {
+	m := initial(true)
+	m.width = 120
+	m.height = 26
+	m.data.Projects[0].ClientName = "Example client"
+	m.openProjects("", Entry{})
+	m.search.SetValue(m.data.Projects[0].Name)
+	plain := ansi.Strip(m.View())
+	if !strings.Contains(plain, "Example client") || !strings.Contains(plain, "Ready to track") {
+		t.Fatal("short-window project details clipped")
+	}
+	m.mode = ""
+	m.focus = 1
+	next, _ := m.Update(tea.KeyMsg{Type: tea.KeyEnd})
+	m = next.(model)
+	if m.cursor != len(m.data.Entries)-1 {
+		t.Fatal("End should reach final row")
+	}
+	next, _ = m.Update(tea.KeyMsg{Type: tea.KeyPgUp})
+	m = next.(model)
+	if m.cursor != max(0, len(m.data.Entries)-11) {
+		t.Fatal("Page Up should move ten rows")
+	}
+}

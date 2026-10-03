@@ -12,6 +12,9 @@ HG identity should come from typography, spacing, hierarchy, and small recogniza
 - Transparent panel interiors and selection, optional opaque mode.
 - Subtle HG signature, clearer panel symbols, block timer, compact shortcut hints and keyboard field guide.
 - Configurable weekly/today panels, density, icon markers, and daily reference.
+- Neon, Gradient, and Make More editions, with inactive frames kept muted for focus clarity.
+- Searchable project explorer with a compact detail panel and visible result range.
+- List position indicators and paging; visible form errors and consistent surface colors across screens.
 
 ## Remaining review work
 

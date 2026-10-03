@@ -1,6 +1,7 @@
 package main
 
 import (
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 	"os"
@@ -116,5 +117,52 @@ func TestEditionOverridesAndLayout(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestFocusedGradientAndUtilityScreens(t *testing.T) {
+	t.Cleanup(refreshStyle)
+	m := initial(true)
+	prefs.Style = "gradient"
+	cyan = "#12bbaa"
+	violet = "#cc66ff"
+	muted = "#888888"
+	if strings.Contains(panel("INACTIVE", "", 30, 2, muted), "18;187;170") {
+		t.Fatal("inactive frame received accent gradient")
+	}
+	for _, size := range [][2]int{{72, 26}, {120, 42}} {
+		m.width, m.height = size[0], size[1]
+		m.mode = "help"
+		plain := ansi.Strip(m.View())
+		if !strings.Contains(plain, "Esc closes help") || lipgloss.Height(m.View()) > m.height {
+			t.Fatal("help footer is clipped")
+		}
+		if !strings.Contains(ansi.Strip(shortcutLine(m.width-2)), "[Q] quit") || lipgloss.Height(shortcutLine(m.width-2)) != 1 {
+			t.Fatal("shortcuts must fit on one line")
+		}
+		m.openForm("save", Entry{})
+		m.failed = true
+		m.notice = "Could not save local timer"
+		if !strings.Contains(ansi.Strip(m.View()), m.notice) || !strings.Contains(ansi.Strip(m.View()), "[Esc] cancel") {
+			t.Fatal("form error hides action controls")
+		}
+	}
+}
+
+func TestFailedSavedTimerWriteKeepsDraftAndList(t *testing.T) {
+	m := initial(true)
+	m.demo = false
+	blocked := filepath.Join(t.TempDir(), "not-a-directory")
+	if err := os.WriteFile(blocked, []byte("blocked"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	m.store.Config = blocked
+	original := m.favorites[0].Description
+	m.openForm("edit-saved", m.favorites[0])
+	m.inputs[0].SetValue("Edited draft")
+	m.field = 5
+	m.formUpdate(tea.KeyMsg{Type: tea.KeyEnter})
+	if m.mode != "edit-saved" || !m.failed || m.favorites[0].Description != original || m.inputs[0].Value() != "Edited draft" {
+		t.Fatal("failed save must preserve draft and original saved timer")
 	}
 }

@@ -61,7 +61,10 @@ func panel(title, body string, width, height int, c lipgloss.Color) string {
 	}
 	headingText := tl + horizontal + " " + title + " "
 	padding := max(0, width-lipgloss.Width(headingText)-1)
-	heading := accentText(headingText+strings.Repeat(horizontal, padding)+tr, c)
+	heading := color(headingText+strings.Repeat(horizontal, padding)+tr, c)
+	if c != muted {
+		heading = accentText(headingText+strings.Repeat(horizontal, padding)+tr, c)
+	}
 	content := lipgloss.NewStyle().Border(lipgloss.Border{Left: vertical, Right: vertical, Bottom: horizontal, BottomLeft: bl, BottomRight: br}, false, true, true, true).BorderForeground(c).Padding(0, 1).Width(width - 2).Height(height).Render(strings.Join(lines, "\n"))
 	return heading + "\n" + content
 }
@@ -165,6 +168,8 @@ func (m model) selected() *Entry {
 }
 func (m *model) openForm(mode string, en Entry) {
 	m.mode = mode
+	m.notice = ""
+	m.failed = false
 	m.field = 0
 	m.form = en
 	m.workspaceIndex = 0
@@ -378,6 +383,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.cursor = 0
 		case "up", "k":
 			m.cursor = max(0, m.cursor-1)
+		case "pgup", "pgdown", "home", "end":
+			rows := m.favorites
+			if m.focus == 1 {
+				rows = m.data.Entries
+			}
+			switch key {
+			case "pgup":
+				m.cursor = max(0, m.cursor-10)
+			case "pgdown":
+				m.cursor = min(max(0, len(rows)-1), m.cursor+10)
+			case "home":
+				m.cursor = 0
+			case "end":
+				m.cursor = max(0, len(rows)-1)
+			}
 		case "down", "j":
 			count := len(m.favorites)
 			if m.focus == 1 {
@@ -513,6 +533,7 @@ func (m *model) formUpdate(msg tea.KeyMsg) tea.Cmd {
 		}
 		if m.form.Workspace == 0 {
 			m.notice = "Choose a workspace"
+			m.failed = true
 			return nil
 		}
 		if m.mode == "save" || m.mode == "edit-saved" {
@@ -521,17 +542,20 @@ func (m *model) formUpdate(msg tea.KeyMsg) tea.Cmd {
 			en.Duration = 0
 			en.Start = time.Time{}
 			en.Stop = nil
-			if m.mode == "edit-saved" && m.cursor < len(m.favorites) {
-				m.favorites[m.cursor] = en
+			saved := append([]Entry(nil), m.favorites...)
+			if m.mode == "edit-saved" && m.cursor < len(saved) {
+				saved[m.cursor] = en
 			} else {
-				m.favorites = append(m.favorites, en)
+				saved = append(saved, en)
 			}
 			if !m.demo {
-				if e := privateJSON(filepath.Join(m.store.Config, "timers.json"), m.favorites); e != nil {
+				if e := privateJSON(filepath.Join(m.store.Config, "timers.json"), saved); e != nil {
 					m.notice = e.Error()
+					m.failed = true
 					return nil
 				}
 			}
+			m.favorites = saved
 			m.mode = ""
 			m.notice = "Saved timer ready · Enter starts it"
 			return nil
@@ -569,9 +593,9 @@ func (m model) formView() string {
 	if m.projectIndex > 0 {
 		project = m.projects[m.projectIndex-1].Name
 	}
-	billable := "○ Not billable"
+	billable := icon("○", "o") + " Not billable"
 	if m.form.Billable {
-		billable = "● Billable"
+		billable = icon("●", "*") + " Billable"
 	}
 	labels := []string{"DESCRIPTION", "WORKSPACE", "PROJECT", "TAGS", "BILLING", "CONFIRM"}
 	values := []string{m.inputs[0].View(), "‹ " + fit(workspace, 48) + " ›", "‹ " + fit(project, 48) + " ›", m.inputs[1].View(), billable, "[ START TIMER ]"}
@@ -597,15 +621,26 @@ func (m model) formView() string {
 		}
 		body.WriteString(color(mark+label, c) + "\n    " + values[i] + "\n")
 	}
-	body.WriteString("\n" + color(fit(actionNote, 62), muted) + "\n")
 	if m.notice != "" && m.failed {
-		body.WriteString(color(fit(m.notice, 62), red) + "\n")
+		actionNote = m.notice
 	}
+	noteColor := muted
+	if m.failed {
+		noteColor = red
+	}
+	body.WriteString("\n" + color(fit(actionNote, 62), noteColor) + "\n")
 	body.WriteString(keycap("Tab", "next") + "  " + keycap("Ctrl+P", "projects") + "  " + keycap("Enter", "confirm") + "  " + keycap("Esc", "cancel"))
 	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, panel("TIMER / "+title, body.String(), min(76, m.width-2), 20, violet))
 
 }
 func (m model) View() string {
+	style := lipgloss.NewStyle().Foreground(text)
+	if !prefs.Transparent {
+		style = style.Background(background)
+	}
+	return style.Render(m.view())
+}
+func (m model) view() string {
 	if m.width < 72 || m.height < 26 {
 		return "Tempo needs a terminal at least 72 columns × 26 rows.\nResize this window. Q quits."
 	}
@@ -689,7 +724,7 @@ func (m model) View() string {
 	} else {
 		recentColor = cyan
 	}
-	lower := lipgloss.JoinHorizontal(lipgloss.Top, panel(icon("◇", "+")+fmt.Sprintf(" SAVED TIMERS / %d", len(m.favorites)), savedRows, savedWidth, lowerHeight, savedColor), " ", panel(icon("↺", "<")+fmt.Sprintf(" RECENT ENTRIES / %d", len(m.data.Entries)), recentRows, recentWidth, lowerHeight, recentColor))
+	lower := lipgloss.JoinHorizontal(lipgloss.Top, panel(icon("◇", "+")+m.listTitle("SAVED", m.favorites, 0), savedRows, savedWidth, lowerHeight, savedColor), " ", panel(icon("↺", "<")+m.listTitle("RECENT", m.data.Entries, 1), recentRows, recentWidth, lowerHeight, recentColor))
 	summary := m.summary(now, w-5)
 	note := m.notice
 	if note == "" {
@@ -719,11 +754,7 @@ func (m model) View() string {
 		noticeColor = red
 	}
 	view += "\n" + color(fit(note, w), noticeColor) + "\n" + ansi.Truncate(footer, w, "")
-	style := lipgloss.NewStyle().Foreground(text)
-	if !prefs.Transparent {
-		style = style.Background(background)
-	}
-	return style.Render(view)
+	return view
 
 }
 func (m model) listView(entries []Entry, focus, width, height int) string {
@@ -750,7 +781,7 @@ func (m model) listView(entries []Entry, focus, width, height int) string {
 		e := entries[i]
 		mark := "  "
 		if m.focus == focus && i == m.cursor {
-			mark = "▸ "
+			mark = icon("▸ ", "> ")
 		}
 		desc := e.Description
 		if desc == "" {
@@ -767,7 +798,7 @@ func (m model) listView(entries []Entry, focus, width, height int) string {
 			dw := max(10, width-26)
 			duration := clock(elapsed(e, time.Now()))
 			if e.Duration < 0 {
-				duration = "▶" + duration
+				duration = icon("▶", ">") + duration
 			}
 			row = mark + e.Start.Local().Format("Mon 15:04") + " " + lipgloss.NewStyle().Width(dw).Render(fit(desc, dw)) + " " + duration
 		}
@@ -885,4 +916,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Tempo:", e)
 		os.Exit(1)
 	}
+}
+
+func (m model) listTitle(name string, rows []Entry, focus int) string {
+	if m.focus == focus && len(rows) > 0 {
+		return fmt.Sprintf(" %s / %d OF %d", name, min(m.cursor+1, len(rows)), len(rows))
+	}
+	return fmt.Sprintf(" %s / %d", name, len(rows))
 }

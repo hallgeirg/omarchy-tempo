@@ -88,6 +88,12 @@ func (m *model) projectsUpdate(msg tea.KeyMsg) tea.Cmd {
 	case "down":
 		m.projectCursor = min(max(0, len(rows)-1), m.projectCursor+1)
 		return nil
+	case "home":
+		m.projectCursor = 0
+		return nil
+	case "end":
+		m.projectCursor = max(0, len(rows)-1)
+		return nil
 	case "pgup":
 		m.projectCursor = max(0, m.projectCursor-10)
 		return nil
@@ -181,6 +187,9 @@ func (m model) projectsView() string {
 	body = lipgloss.NewStyle().Width(listWidth - 4).Height(listHeight + 1).Render(body)
 	detail := "Ctrl+U clears search · Enter opens the timer form."
 	if len(rows) > 0 {
+		detail = fmt.Sprintf("%d–%d of %d · PgUp/PgDn scroll · Ctrl+U clears", start+1, min(len(rows), start+listHeight), len(rows))
+	}
+	if len(rows) > 0 {
 		p := rows[min(m.projectCursor, len(rows)-1)]
 		if detailWidth > 0 {
 			state := "Ready to track"
@@ -189,9 +198,9 @@ func (m model) projectsView() string {
 			} else if p.CanTrack != nil && !*p.CanTrack {
 				state = "Read-only"
 			}
-			info := color(fit(p.Name, detailWidth-4), cyan) + "\n\n" + color("WORKSPACE", muted) + "\n" + fit(m.workspaceName(workspaceOf(p)), detailWidth-4) + "\n\n"
+			info := color(fit(p.Name, detailWidth-4), cyan) + "\n" + color("WORKSPACE", muted) + "\n" + fit(m.workspaceName(workspaceOf(p)), detailWidth-4) + "\n"
 			if p.ClientName != "" {
-				info += color("CLIENT", muted) + "\n" + fit(p.ClientName, detailWidth-4) + "\n\n"
+				info += color("CLIENT", muted) + "\n" + fit(p.ClientName, detailWidth-4) + "\n"
 			}
 			var total int64
 			count := 0
@@ -201,7 +210,11 @@ func (m model) projectsView() string {
 					count++
 				}
 			}
-			info += color("CACHED ACTIVITY", muted) + "\n" + hour(total) + fmt.Sprintf(" · %d entries", count) + "\n\n" + color(state, green)
+			stateColor := green
+			if state != "Ready to track" {
+				stateColor = muted
+			}
+			info += color("CACHED ACTIVITY", muted) + "\n" + hour(total) + fmt.Sprintf(" · %d entries", count) + "\n" + color(state, stateColor)
 			body = lipgloss.JoinHorizontal(lipgloss.Top, body, " ", panel("PROJECT", info, detailWidth, listHeight-1, violet))
 		} else if p.ClientName != "" {
 			detail = "Client: " + p.ClientName + " · Enter opens a timer form"

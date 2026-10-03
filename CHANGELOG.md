@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1
+
+- Clarified focused panels and selected list positions; added paging and first/last navigation.
+- Fixed clipped project details, form errors, and compact shortcut hints.
+- Applied foreground/background preferences consistently to utility screens and updated search styling live.
+- Preserve the draft and original saved timer when a local save fails.
+
 ## 0.5.0
 
 - Added Neon, theme-driven Gradient, and Make More editions.
