@@ -45,6 +45,7 @@ Press R to refresh. Automatic sync runs every ten minutes; failed syncs back off
 | --- | --- |
 | `~/.config/omarchy-tempo/credentials.json` | Private API token |
 | `~/.config/omarchy-tempo/timers.json` | Local saved timers |
+| `~/.config/omarchy-tempo/preferences.json` | Theme and display preferences |
 | `~/.cache/omarchy-tempo/` | Cached account metadata, entries, and sync state |
 | `~/Documents/Tempo/` | CSV exports |
 

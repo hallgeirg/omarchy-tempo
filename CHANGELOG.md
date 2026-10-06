@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Document plugin updates, disabling, removal, runtime dependencies, and preserved user data for public distribution.
+- Reconcile the design roadmap and keyboard reference with the current preview.
+
 ## 0.5.1
 
 - Clarified focused panels and selected list positions; added paging and first/last navigation.

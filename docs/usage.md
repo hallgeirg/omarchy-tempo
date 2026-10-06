@@ -20,6 +20,7 @@ Timery's Apple/iCloud saved timers; your actual time entries live in Toggl.
 | F | Save selected/running entry as a timer; editable before saving |
 | Delete | Remove the selected local saved timer |
 | E | Edit the selected saved timer |
+| T | Cycle Theme, Neon, Gradient, and Make More editions |
 | R | Refresh from Toggl |
 | A | Connect/reconnect account |
 | X | Export cached entries as CSV to ~/Documents/Tempo |
