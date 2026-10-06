@@ -40,7 +40,7 @@ Start work, repeat recent entries, and keep saved timers a keystroke away. See t
 
 Artwork uses fictional data and example palettes. The app follows your active theme; its transparent interiors inherit your terminal’s opacity. [Make it yours →](docs/customization.md)
 
-> **Preview release:** usable baseline, still under design review. HG styling, live Omarchy theme colors, and user preferences are available for review. No catalog submission has been made.
+> **Preview release:** usable baseline, still under design review. HG styling, live Omarchy theme colors, and user preferences are available for review. Available for direct installation from GitHub; catalog publication requires marketplace maintainer approval.
 
 ## What you get
 
@@ -57,7 +57,7 @@ Tempo is an independent project inspired by Timery and btop. It is not affiliate
 
 ## Install
 
-Requires an Omarchy installation with `omarchy-shell` plugin support and a working terminal launcher. The bundled binary targets **Linux x86-64**; Go is only needed to rebuild it. Other architectures must build from source.
+Requires Omarchy Quattro with `omarchy-shell` plugin support, Bash, coreutils, and a working Omarchy terminal launcher. A Toggl Track account and API token are needed for live time tracking. The bundled binary targets **Linux x86-64**; Go is only needed to rebuild it. Other architectures must build from source.
 
 ```bash
 omarchy plugin add https://github.com/hallgeirg/omarchy-tempo.git --enable
@@ -70,6 +70,28 @@ Click **Tempo** in the top bar. Or launch it directly:
 ```
 
 The plugin ID is `hg.tempo` on every machine. The `~` in the launch path means your own home directory. Credentials and saved timers live separately from the plugin checkout. Upgrading an early preview? See [migration instructions](docs/migration.md).
+
+## Update or remove
+
+Close the dashboard before updating, then review and accept the changes:
+
+```bash
+omarchy plugin update hg.tempo
+```
+
+Disable the bar widget without removing it:
+
+```bash
+omarchy plugin disable hg.tempo
+```
+
+Remove the plugin checkout:
+
+```bash
+omarchy plugin remove hg.tempo
+```
+
+Updating, disabling, or removing the plugin preserves credentials, preferences, saved timers, cached data, and CSV exports. Removing it does not stop a running Toggl timer; stop that timer in Tempo or Toggl first if needed. See [data files and backups](docs/troubleshooting.md#data-files-and-backups) before deliberately deleting personal data.
 
 ## Connect Toggl
 
@@ -94,6 +116,7 @@ Enter your token inside Tempo, never in a GitHub issue or shell command. Startin
 | **Delete** | Delete selected local saved timer |
 | **Tab / Left / Right** | Switch tables; select options in forms |
 | **Up / Down / J / K** | Select an entry |
+| **T** | Cycle Theme, Neon, Gradient, and Make More editions |
 | **R** | Refresh Toggl data |
 | **A** | Connect or change account |
 | **X** | Export CSV |

@@ -1,6 +1,6 @@
 # Design review roadmap
 
-This repository is a preview. Do not submit it to the Omarchy plugin catalog until the design review is complete.
+Tempo is distributed as a preview plugin. This roadmap tracks further design work; it does not claim that every planned feature is available. Catalog publication is subject to marketplace maintainer approval.
 
 ## Direction
 
@@ -18,7 +18,7 @@ HG identity should come from typography, spacing, hierarchy, and small recogniza
 
 ## Remaining review work
 
-- User configuration for panel visibility, layout/density, date and time formats, week start, progress reference, and shortcuts.
+- Extend the existing panel visibility, density, and progress settings with localized date/time formats, configurable week start, and shortcut remapping.
 - First-run account onboarding, clearer timer selection/start confirmation, and useful empty/error/offline states.
 - Review the dashboard with real keyboard workflows, narrow terminals, and several light/dark Omarchy themes.
 - Keep configuration local, documented, and migration-friendly; provide a reset-to-defaults path for app preferences.
@@ -29,4 +29,4 @@ HG identity should come from typography, spacing, hierarchy, and small recogniza
 2. Agree on primary workflows and customization settings.
 3. Implement theme-aware foundations and HG details.
 4. Check usability, resizing, offline behavior, and theme switching.
-5. Publish a polished release, then consider catalog submission.
+5. Continue improving the preview through focused releases while keeping installation instructions and limitations current.
