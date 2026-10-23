@@ -351,7 +351,11 @@ func daily(d Snapshot, now time.Time) ([7]int64, int64) {
 		week += overlap(e, weekStart, now, now)
 		for i := 0; i < 7; i++ {
 			b := mid.AddDate(0, 0, i-6)
-			days[i] += overlap(e, b, b.AddDate(0, 0, 1), now)
+			end := b.AddDate(0, 0, 1)
+			if end.After(now) {
+				end = now
+			}
+			days[i] += overlap(e, b, end, now)
 		}
 	}
 	return days, week
