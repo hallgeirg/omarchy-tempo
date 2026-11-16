@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Clip today's activity chart at the current time so cached future-ending entries agree with weekly and project totals.
 - Document plugin updates, disabling, removal, runtime dependencies, and preserved user data for public distribution.
 - Reconcile the design roadmap and keyboard reference with the current preview.
 
